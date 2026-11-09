@@ -1,0 +1,1235 @@
+<!doctype html><html lang="ko"><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="구피 키우기"><meta name="theme-color" content="#123a33"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>구피 키우기</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@700;900&display=swap" rel="stylesheet">
+<style>
+/* Layout: one phone-shaped screen — wood HUD strip on top, painted aquarium canvas, wood shop tray at the bottom; menus are framed wood panels with dark inlays. */
+:root{
+  --ink:#24160c;        /* frame outline */
+  --wood:#8a5a36;
+  --wood-hi:#b9824f;
+  --wood-lo:#5e3b22;
+  --inlay:#3f2a1a;      /* dark panel interior */
+  --inlay-2:#4f3522;
+  --text:#f7e9cc;
+  --muted:#c8ad86;
+  --gold:#ffd04a;
+  --green:#5f9e48;
+  --red:#b8402f;
+  --stone:#6d757e;
+  --f-display:"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  --f-body:"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  --outline:-1.5px -1.5px 0 var(--ink),1.5px -1.5px 0 var(--ink),-1.5px 1.5px 0 var(--ink),1.5px 1.5px 0 var(--ink),0 2px 0 var(--ink);
+  color-scheme:dark;
+}
+html,body{height:100%}
+/* every label is a bold plain gothic with a dark outline, so it reads on wood, stone and water alike */
+#app :is(span,b,div,button,p,h2,small){text-shadow:var(--outline)}
+#app :is(.btn,.pill,h2,.big,.sbtn,.tn,.rec .sc,.stats b,.bonus b,.chip,.newbest,#toast .t2,.bests b,.theme,.icon-btn,.howto b){font-weight:900}
+body{margin:0;background:#0d2420;color:var(--text);font-family:var(--f-body);font-weight:700;overflow:hidden;
+  -webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+img{-webkit-user-drag:none}
+#app{position:relative;height:100%;max-width:480px;margin:0 auto;display:flex;flex-direction:column;background:#123a33;overflow:hidden}
+/* shared wood + stone surfaces */
+.wood{background:linear-gradient(var(--wood-hi),var(--wood) 30%,var(--wood-lo));border:3px solid var(--ink);box-shadow:inset 0 2px 0 rgba(255,220,170,.35),inset 0 -3px 0 rgba(0,0,0,.25)}
+.stone{background:linear-gradient(#8d959e,var(--stone) 40%,#4c535a);border:3px solid var(--ink);box-shadow:inset 0 2px 0 rgba(255,255,255,.35),inset 0 -3px 0 rgba(0,0,0,.3)}
+#hud{display:flex;align-items:center;gap:7px;padding:7px max(9px,env(safe-area-inset-right,0px)) 7px max(9px,env(safe-area-inset-left,0px));
+  background:linear-gradient(#6e4a2c,#4a3019);border-bottom:3px solid var(--ink);font-family:var(--f-display);z-index:2}
+.pill{display:flex;align-items:center;gap:5px;background:var(--inlay);border:3px solid var(--ink);border-radius:6px;padding:2px 9px 2px 4px;font-size:18px;font-variant-numeric:tabular-nums;min-width:0;color:var(--text);
+  box-shadow:inset 0 2px 0 rgba(0,0,0,.35),0 0 0 2px var(--wood-hi)}
+.pill img{width:20px;height:20px;object-fit:contain}
+#timebar{position:relative;flex:1;height:20px;border:3px solid var(--ink);border-radius:4px;background:var(--inlay);overflow:hidden;min-width:40px;box-shadow:0 0 0 2px var(--wood-hi)}
+#timeTxt{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:13px;color:#fff;font-variant-numeric:tabular-nums;text-shadow:0 1px 0 var(--ink),0 0 2px var(--ink)}
+#timefill.endless{background:linear-gradient(#7fd0ff,#3a86c0)}
+#timefill{height:100%;width:100%;background:linear-gradient(#8fe07a,#4f9e3c)}
+#timefill.low{background:linear-gradient(#ff9a7a,var(--red))}
+.icon-btn{width:36px;height:36px;border-radius:6px;font-family:var(--f-display);font-size:16px;color:#fff;cursor:pointer;flex:none;text-shadow:0 2px 0 var(--ink)}
+button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+#stage{position:relative;flex:1;min-height:0}
+/* scrolling panels: the bottom edge fades and a bobbing pill says there is more below */
+.card{position:relative}
+.card>.in.more{-webkit-mask-image:linear-gradient(to bottom,#000 calc(100% - 48px),rgba(0,0,0,.15));mask-image:linear-gradient(to bottom,#000 calc(100% - 48px),rgba(0,0,0,.15))}
+#app .morehint{position:absolute;left:50%;z-index:3;display:flex;align-items:center;gap:4px;padding:3px 11px 4px;border-radius:99px;cursor:pointer;white-space:nowrap;
+  background:var(--gold);color:#3a2200;font-family:var(--f-display);font-size:12px;font-weight:900;border:2.5px solid var(--ink);box-shadow:0 3px 0 rgba(0,0,0,.4);text-shadow:none;
+  animation:bob 1s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,5px)}}
+@media (prefers-reduced-motion:reduce){#app .morehint{animation:none;transform:translateX(-50%)}}
+#app.menu #hud,#app.menu #shop{display:none}
+.row.four .btn{font-size:16px;padding:11px 2px}
+.tutcv{width:100%;aspect-ratio:300/190;border:3px solid var(--ink);border-radius:8px;display:block;background:#123a33;flex:none}
+.tuttxt{margin:0;font-size:14px;line-height:1.65;color:var(--text)}
+.tuttxt b{color:var(--gold)}
+.tutlist{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:7px;font-size:14.5px;line-height:1.45;color:var(--text)}
+.tutlist li{position:relative;padding-left:17px}
+.tutlist li::before{content:'';position:absolute;left:2px;top:.48em;width:7px;height:7px;border-radius:50%;background:var(--gold);border:1.5px solid var(--ink)}
+.tutlist b{color:var(--gold)}
+/* 도감: a grid of collectible cards — picture on a tinted tile, a badge, the name, a short blurb */
+.dexgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.dsec{grid-column:1/-1;display:flex;align-items:center;gap:8px;font-family:var(--f-display);font-weight:900;font-size:16px;color:var(--text);margin-top:6px}
+.dsec::after{content:'';flex:1;height:0;border-bottom:2px dashed #5e4430}
+.dsec:first-child{margin-top:0}
+.dcard{display:flex;flex-direction:column;min-width:0;border-radius:11px;overflow:hidden;background:var(--inlay-2);border:2.5px solid var(--ink);box-shadow:0 3px 0 rgba(0,0,0,.4),inset 0 1px 0 rgba(255,220,170,.15)}
+.dcard .pic{position:relative;height:80px;display:flex;align-items:center;justify-content:center;border-bottom:2.5px solid var(--ink);
+  background:radial-gradient(circle at 50% 62%,var(--c) 0,color-mix(in srgb,var(--c) 45%,#0d2420) 55%,#0d2420 100%)}
+.dcard .pic::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(135deg,rgba(255,255,255,.05) 0 6px,transparent 6px 12px)}
+.dcard .pic img{position:relative;max-width:82%;max-height:62px;object-fit:contain;filter:drop-shadow(0 3px 2px rgba(0,0,0,.55))}
+#app .dcard .bdg{position:absolute;top:5px;left:5px;z-index:1;font-size:10px;font-weight:900;padding:1px 7px;border-radius:99px;background:var(--gold);color:#3a2200;text-shadow:none;border:1.5px solid var(--ink)}
+#app .dcard .bdg.red{background:#ff7a5a;color:#2a0800}
+.dcard .nm{padding:6px 8px 1px;font-family:var(--f-display);font-weight:900;font-size:14px;line-height:1.2;color:var(--gold)}
+.dcard .ds{padding:2px 8px 9px;font-size:11.5px;line-height:1.45;color:var(--text);word-break:keep-all}
+.dcard .dg{padding:0 8px;font-size:10.5px;color:var(--muted);letter-spacing:1px}
+.dcard .dg i{font-style:normal;color:#ff6b5b}
+.dnote{grid-column:1/-1;padding:9px 11px;border-radius:10px;border:2px dashed #7a5a3a;background:rgba(0,0,0,.18);font-size:12px;line-height:1.5;color:var(--muted)}
+.dnote b{color:var(--gold)}
+#cv{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
+#shop{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;padding:7px max(7px,env(safe-area-inset-right,0px)) 8px max(7px,env(safe-area-inset-left,0px));
+  background:linear-gradient(#4a3019,#3a2513);border-top:3px solid var(--ink);z-index:2}
+.sbtn{position:relative;display:flex;flex-direction:column;align-items:center;gap:1px;padding:4px 0 5px;border-radius:8px;
+  font-family:var(--f-display);color:#fff;cursor:pointer;overflow:hidden;transition:transform .05s}
+.sbtn:active{transform:translateY(2px)}
+.sbtn img{height:30px;width:52px;object-fit:contain;filter:drop-shadow(0 2px 0 rgba(0,0,0,.4))}
+.sbtn .nm{font-size:11px;line-height:1.1;white-space:nowrap;letter-spacing:-.6px;text-shadow:0 1px 0 var(--ink),0 0 2px var(--ink)}
+.sbtn .pr{display:flex;align-items:center;gap:2px;font-size:13px;color:var(--gold);font-variant-numeric:tabular-nums;text-shadow:0 1px 0 var(--ink),0 0 2px var(--ink)}
+.sbtn .pr img{width:12px;height:12px}
+.sbtn.off{filter:saturate(.3) brightness(.7)}
+.sbtn.warn{animation:warn .5s ease-in-out infinite alternate}
+@keyframes warn{to{box-shadow:0 0 0 3px #ff6a4a,0 0 14px #ff6a4a}}
+.sbtn.max .pr{color:var(--muted)}
+.sbtn .cd{position:absolute;left:0;right:0;bottom:0;background:rgba(20,10,4,.5);pointer-events:none}
+.screen{position:absolute;inset:0;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;
+  padding:20px max(16px,env(safe-area-inset-right,0px)) 20px max(16px,env(safe-area-inset-left,0px));background:rgba(6,20,18,.5)}
+[hidden]{display:none!important}
+/* framed wood panel with a dark inlay, after the reference mockup */
+.card{width:100%;max-width:380px;border-radius:12px;padding:10px;max-height:100%;display:flex;flex-direction:column;
+  background:linear-gradient(var(--wood-hi),var(--wood) 20%,var(--wood-lo));border:4px solid var(--ink);box-shadow:0 6px 0 rgba(0,0,0,.45),inset 0 3px 0 rgba(255,220,170,.35),0 0 0 3px #3c6b2c}
+.card>.in{background:var(--inlay);border:3px solid var(--ink);border-radius:8px;box-shadow:inset 0 3px 0 rgba(0,0,0,.35);padding:14px;display:flex;flex-direction:column;gap:12px;overflow:auto;min-height:0}
+.card>h2{margin:0 0 8px;color:var(--text);text-shadow:0 2px 0 var(--ink)}
+h2{font-family:var(--f-display);margin:0;text-wrap:balance;text-align:center;font-size:24px}
+.title{width:min(94%,380px);height:auto;filter:drop-shadow(0 5px 0 rgba(0,0,0,.45))}
+.btn{font-family:var(--f-display);font-size:21px;padding:11px 14px;border-radius:8px;color:#fff;cursor:pointer;width:100%;text-shadow:0 2px 0 var(--ink)}
+.btn:active{transform:translateY(2px)}
+.btn.green{background:linear-gradient(#8ccf6c,var(--green) 40%,#3f7430);border:3px solid var(--ink);box-shadow:inset 0 2px 0 rgba(255,255,255,.35),inset 0 -3px 0 rgba(0,0,0,.3)}
+.btn.gold{background:linear-gradient(#ffe48a,#e9a92a 45%,#b8761a);border:3px solid var(--ink);box-shadow:inset 0 2px 0 rgba(255,255,255,.4),inset 0 -3px 0 rgba(0,0,0,.3)}
+.btn.amazon{background:linear-gradient(#b8603f,#7a2e1e 45%,#4c1a10);border:3px solid var(--ink);box-shadow:inset 0 2px 0 rgba(255,255,255,.3),inset 0 -3px 0 rgba(0,0,0,.3)}
+.btn.red{background:linear-gradient(#f08a7a,#c8452f 45%,#8e2a1c);border:3px solid var(--ink);box-shadow:inset 0 2px 0 rgba(255,255,255,.35),inset 0 -3px 0 rgba(0,0,0,.3)}
+#recReset{flex:1.4;white-space:nowrap;font-size:clamp(15px,4.8vw,19px);padding-left:6px;padding-right:6px}
+.btn small{display:block;font-family:var(--f-body);font-size:12px;opacity:.95;margin-top:2px;text-shadow:0 1px 0 var(--ink)}
+.row{display:flex;gap:8px}
+.row>*{flex:1;min-width:0}
+.bests{display:flex;justify-content:space-between;gap:8px;font-size:13px;color:var(--muted)}
+.bests b{font-family:var(--f-display);font-weight:400;font-size:18px;color:var(--gold);font-variant-numeric:tabular-nums}
+/* main menu: one glass panel over the tank; each mode is a photo card of its own water with its best score */
+.mpanel{width:100%;max-width:380px;display:flex;flex-direction:column;gap:10px;padding:12px;border-radius:16px;
+  background:rgba(8,26,23,.66);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);border:2px solid rgba(170,235,215,.22);box-shadow:0 12px 30px rgba(0,0,0,.45)}
+.mode{position:relative;display:flex;align-items:center;gap:10px;width:100%;min-height:76px;padding:10px 12px 10px 8px;border-radius:12px;overflow:hidden;cursor:pointer;
+  color:#fff;text-align:left;font-family:var(--f-display);background:#123a33;border:2px solid rgba(255,255,255,.2);box-shadow:0 4px 0 rgba(0,0,0,.4);transition:transform .12s,border-color .12s,box-shadow .12s}
+.mode .mbg{position:absolute;inset:0;background:url(assets/bg.jpg) center 72%/cover}
+.mode::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,rgba(4,16,14,.15),rgba(4,16,14,.55) 30%,rgba(4,16,14,.8))}
+.mode>:not(.mbg){position:relative;z-index:1}
+.mode .mfish{width:54px;height:40px;object-fit:contain;flex:none;filter:drop-shadow(0 0 6px rgba(220,255,240,.45)) drop-shadow(0 3px 2px rgba(0,0,0,.55))}
+.mode.amazon .mfish,.mode.endless .mfish{filter:brightness(1.35) drop-shadow(0 0 6px rgba(255,220,170,.5)) drop-shadow(0 3px 2px rgba(0,0,0,.55))}
+/* the name shrinks to fit beside a long best score; the subtitle wraps evenly instead of being cut */
+.mode .mt{flex:1;min-width:0;container-type:inline-size}
+.mode .mt .mn{font-size:min(19px,calc(100cqi / 10.8))}
+.mode .mt .ms{white-space:normal;text-wrap:balance;word-break:keep-all;line-height:1.3}
+.mode .mn{display:block;font-size:19px;font-weight:900;line-height:1.2;white-space:nowrap}
+.mode .ms{display:block;font-family:var(--f-body);font-size:11.5px;color:#d3e7de;margin-top:3px;white-space:nowrap;letter-spacing:-.3px}
+#app .tag{display:inline-block;font-style:normal;font-size:10.5px;font-weight:900;padding:1px 7px;margin-left:6px;border-radius:99px;vertical-align:3px;color:#10241f;text-shadow:none}
+.tag.normal{background:#9be37a}.tag.hard{background:#ff9466}.tag.inf{background:var(--gold)}
+.mode .mb{flex:none;text-align:right;font-size:10.5px;color:#cfe3da}
+.mode .mb b{display:block;font-size:17px;color:var(--gold);font-variant-numeric:tabular-nums}
+.mode:hover{transform:translateY(-2px);border-color:rgba(255,255,255,.5)}
+.mode:active{transform:translateY(2px);box-shadow:0 1px 0 rgba(0,0,0,.4)}
+.mode.lake{border-color:rgba(155,227,122,.6)}
+.mode.amazon{border-color:rgba(255,148,102,.6)}
+.mode.amazon .mbg{filter:sepia(.6) hue-rotate(-12deg) saturate(1.3) brightness(.5)}
+.mode.endless{border-color:#e0453a;box-shadow:0 4px 0 rgba(0,0,0,.4),0 0 18px rgba(224,40,30,.45)}
+.mode.endless .mbg{filter:sepia(.9) hue-rotate(-45deg) saturate(3) brightness(.5) contrast(1.15)}
+.mode.endless .mbg::after{content:'';position:absolute;inset:0;background:#ff3a30;mix-blend-mode:multiply}
+.tag.inf{background:#ff6a5a}
+@media (max-width:360px){.mode{gap:7px;padding-right:10px}.mode .mfish{width:40px}.mode .ms{font-size:10.5px;letter-spacing:-.3px}.mode .mb b{font-size:15px}#app .tag{margin-left:4px;padding:1px 5px}}
+/* best stars on the 3-minute cards; empty stars stay dim */
+.mode .mst{display:block;font-size:9.5px;letter-spacing:-.5px;line-height:1.2;color:rgba(255,255,255,.28)}
+.mode .mst i{font-style:normal;color:var(--gold)}
+/* a locked card shakes when tapped; a freshly unlocked one glows twice and wears a NEW badge until played */
+@keyframes nope{20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+.mode.nope{animation:nope .35s}
+@keyframes fresh{0%,100%{box-shadow:0 4px 0 rgba(0,0,0,.4)}50%{box-shadow:0 4px 0 rgba(0,0,0,.4),0 0 22px 4px rgba(255,236,150,.75)}}
+.mode.fresh{animation:fresh 1.1s ease-in-out 2}
+.mode .newb{display:none}
+/* a locked card shows only a padlock where the stars and best score would be */
+.mode .mlock{display:none;flex:none;width:30px;height:34px;margin-right:4px;
+  background:center/contain no-repeat url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 34'%3E%3Cpath d='M8 15V10a7 7 0 0 1 14 0v5' fill='none' stroke='%2324160c' stroke-width='7' stroke-linecap='round'/%3E%3Cpath d='M8 15V10a7 7 0 0 1 14 0v5' fill='none' stroke='%23e6dcc8' stroke-width='3.5' stroke-linecap='round'/%3E%3Crect x='3' y='14' width='24' height='18' rx='4' fill='%23ffd04a' stroke='%2324160c' stroke-width='2.5'/%3E%3Crect x='5' y='16' width='20' height='4' rx='2' fill='%23fff3b8' opacity='.7'/%3E%3Ccircle cx='15' cy='23' r='2.6' fill='%2324160c'/%3E%3Cpath d='M15 24v4' stroke='%2324160c' stroke-width='2.6' stroke-linecap='round'/%3E%3C/svg%3E")}
+.mode.locked .mb{display:none}
+.mode.locked .mlock{display:block}
+#app .mode.fresh .newb{display:block;position:absolute;top:5px;left:6px;z-index:2;font-size:10px;font-weight:900;padding:1px 6px;border-radius:99px;background:var(--gold);color:#3a2200;text-shadow:none}
+#lockMsg{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);z-index:15;width:max-content;max-width:calc(100% - 32px);text-align:center;
+  padding:8px 14px;border-radius:10px;background:rgba(20,8,6,.9);border:2px solid #ff9466;font-size:13px;color:#fff;font-weight:900}
+.chip.unlock{background:#3c5a1e;border-color:var(--ink);color:#e9ffd8}
+@media (prefers-reduced-motion:reduce){.mode.nope,.mode.fresh{animation:none}}
+.mnav{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:2px}
+.nav{display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 4px 7px;border-radius:10px;cursor:pointer;white-space:nowrap;
+  color:#fff;font-family:var(--f-display);font-size:14px;font-weight:900;background:rgba(255,255,255,.07);border:2px solid rgba(255,255,255,.15);transition:background .12s,transform .12s}
+.nav img{width:30px;height:26px;object-fit:contain}
+.nav:hover{background:rgba(255,255,255,.14)}
+.nav:active{transform:translateY(2px)}
+.themes{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.theme{border:3px solid var(--ink);border-radius:6px;height:54px;cursor:pointer;font-family:var(--f-display);font-size:13px;color:#fff;background-size:cover;background-position:center 70%;
+  display:flex;align-items:flex-end;justify-content:center;padding:0 2px 4px;text-shadow:0 1px 0 var(--ink),0 0 3px var(--ink)}
+.theme.sel{box-shadow:0 0 0 3px var(--gold)}
+.trophies{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.tro{border:2px solid var(--ink);border-radius:6px;padding:8px 5px;text-align:center;background:var(--inlay-2);display:flex;flex-direction:column;align-items:center;gap:4px;min-width:0}
+.tro img{width:34px;height:34px;object-fit:contain}
+.tro .tn{font-family:var(--f-display);font-size:14px;line-height:1.1}
+.tro .td{font-size:10.5px;color:var(--muted);line-height:1.25}
+.tro.lock{opacity:.75}
+.tro.lock img{filter:grayscale(1) brightness(.5)}
+.prog{width:100%;height:5px;background:#2a1b10;border-radius:4px;overflow:hidden}
+.prog i{display:block;height:100%;background:var(--gold)}
+.rec{display:flex;justify-content:space-between;align-items:center;padding:7px 4px;border-bottom:2px dashed #5e4430;font-variant-numeric:tabular-nums;gap:8px}
+.rec .rk{font-family:var(--f-display);width:26px;color:var(--muted)}
+.rec .sc{font-family:var(--f-display);font-size:19px;flex:1}
+.rec .st{color:var(--gold);letter-spacing:1px}
+.rec .dt{font-size:11px;color:var(--muted)}
+.big{font-family:var(--f-display);font-size:54px;text-align:center;line-height:1;font-variant-numeric:tabular-nums;color:var(--gold);text-shadow:0 3px 0 var(--ink)}
+.stars{display:flex;justify-content:center;gap:10px}
+.stars svg{width:54px;height:54px;overflow:visible;filter:grayscale(1) brightness(.35);transform:scale(.7);transition:transform .35s cubic-bezier(.3,1.8,.5,1),filter .2s}
+.stars svg.on{filter:none;transform:scale(1)}
+.bonus{text-align:center;font-size:13px;background:var(--inlay-2);border:2px solid #7a5a3a;border-radius:6px;padding:6px 8px;line-height:1.4}
+.bonus b{font-family:var(--f-display);font-weight:400;font-size:18px;color:#9be37a}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;text-align:center;font-size:12px;color:var(--muted)}
+.stats b{display:block;font-family:var(--f-display);font-weight:400;font-size:21px;color:var(--text)}
+.newbest{align-self:center;font-family:var(--f-display);background:var(--red);color:#fff;border:2px solid var(--ink);border-radius:4px;padding:3px 12px;transform:rotate(-4deg)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+.chip{display:flex;align-items:center;gap:4px;font-size:13px;border:2px solid var(--ink);border-radius:4px;padding:2px 8px 2px 4px;background:var(--inlay-2);font-family:var(--f-display)}
+.chip img{width:18px;height:18px}
+.hint{font-size:12px;color:var(--muted);text-align:center;line-height:1.55;margin:0}
+.hint b{color:var(--text)}
+.howto{display:grid;grid-template-columns:64px 1fr;gap:10px 10px;font-size:13px;line-height:1.4;align-items:center}
+.howto img{width:64px;height:44px;object-fit:contain}
+.dots{display:flex;justify-content:center;gap:8px;margin:10px 0 8px}
+.dots i{width:9px;height:9px;border-radius:50%;background:#5e4430;border:2px solid var(--ink)}
+.dots i.on{background:var(--gold)}
+.tsec{grid-column:1/-1;font-family:var(--f-display);font-weight:900;font-size:17px;color:var(--text);border-bottom:2px dashed #5e4430;padding-bottom:4px;margin-top:4px}
+.howto b{font-family:var(--f-display);font-weight:400;font-size:15px;color:var(--gold)}
+#toast{position:absolute;left:50%;bottom:12px;transform:translate(-50%,160%);z-index:20;border-radius:10px;
+  padding:6px 14px 6px 6px;display:flex;align-items:center;gap:10px;transition:transform .35s cubic-bezier(.3,1.5,.5,1),opacity .25s;width:max-content;max-width:90%;opacity:0;pointer-events:none}
+#toast.show{transform:translate(-50%,0);opacity:1}
+#toast img{width:38px;height:38px;object-fit:contain}
+#toast .t1{font-size:11px;color:#ffe8b8;text-shadow:0 1px 0 var(--ink)}
+#toast .t2{font-family:var(--f-display);font-size:18px;color:#fff;text-shadow:0 2px 0 var(--ink)}
+#loading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--f-display);font-size:20px;color:var(--text);z-index:30;background:#123a33}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div id="app" class="menu">
+  <div id="hud">
+    <div class="pill" title="보유 동전"><img src="assets/gold0.png" alt=""><span id="money">0</span></div>
+    <div class="pill" title="점수"><img src="assets/star.png" alt=""><span id="score">0</span></div>
+    <div id="timebar"><div id="timefill"></div><span id="timeTxt"></span></div>
+    <button class="icon-btn stone" id="pauseBtn" aria-label="일시정지">II</button>
+  </div>
+  <div id="stage">
+    <canvas id="cv"></canvas>
+    <div id="loading">수조 채우는 중…</div>
+
+    <div class="screen" id="menu">
+      <img class="title" src="assets/title2.png" alt="구피 키우기">
+      <div class="mpanel">
+        <button class="mode lake" id="lakeBtn"><span class="mbg"></span><img class="mfish" src="assets/angel.png" alt="">
+          <span class="mt"><span class="mn">아마존 클리어워터<i class="tag normal">보통</i></span><span class="ms">3분 · 침입자 컨빅트·디스커스·엔젤·오스카</span></span>
+          <span class="mb"><span class="mst" id="stLake"></span>최고<b id="bestLake">0</b></span></button>
+        <button class="mode amazon" id="hardBtn"><span class="mbg"></span><span class="newb">NEW</span><img class="mfish" src="assets/piranha.png" alt="">
+          <span class="mt"><span class="mn">아마존 블랙워터<i class="tag hard">어려움</i></span><span class="ms">3분 · 침입자 4종 + 보스 블랙 피라냐</span></span>
+          <span class="mb"><span class="mst" id="stHard"></span>최고<b id="bestHard">0</b></span><span class="mlock"></span></button>
+        <button class="mode endless" id="endlessBtn"><span class="mbg"></span><span class="newb">NEW</span><img class="mfish" src="assets/oscar.png" alt="">
+          <span class="mt"><span class="mn">블랙워터 무한<i class="tag inf">무한</i></span><span class="ms">시간 제한 없음 · 침입자가 점점 강해져요</span></span>
+          <span class="mb">최고<b id="bestEndless">0</b></span><span class="mlock"></span></button>
+        <div class="mnav">
+          <button class="nav" id="dexBtn"><img src="assets/guppy_blue.png" alt="">도감</button>
+          <button class="nav" id="howBtn"><img src="assets/feed.png" alt="">튜토리얼</button>
+          <button class="nav" id="troBtn"><img src="assets/cup_g.png" alt="">트로피</button>
+          <button class="nav" id="recBtn"><img src="assets/star.png" alt="">기록</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen" id="tutScr" hidden>
+      <div class="card"><h2 id="tutTitle">사료 주기</h2><div class="in" id="tutIn">
+        <canvas id="tutCv" class="tutcv"></canvas>
+        <div class="tuttxt" id="tutTxt"></div>
+      </div>
+      <div class="dots" id="tutDots"></div>
+      <div class="row"><button class="btn stone" id="tutLeft">건너뛰기</button><button class="btn green" id="tutRight">다음</button></div>
+      </div>
+    </div>
+
+    <div class="screen" id="dexScr" hidden>
+      <div class="card"><h2>도감</h2><div class="in"><div class="dexgrid" id="dexGrid"></div></div>
+      <div class="row" style="margin-top:10px"><button class="btn stone" data-close>닫기</button></div></div>
+    </div>
+
+    <div class="screen" id="pause" hidden>
+      <div class="card"><h2>잠깐 쉬는 중</h2><div class="in">
+        <button class="btn green" id="resumeBtn">계속하기</button>
+        <button class="btn stone" id="quitBtn">그만하기</button>
+        <p class="hint"><b>탭</b>: 사료 주기 (동시에 최대 3알) · 동전 줍기<br><b>쓸어넘기기</b>: 뜰채로 회색 구피 건지기, 침입자 후려치기<br>수질이 30% 아래면 구피가 느려지고 동전을 안 낳아요. 컬러 구피를 같이 건지면 감점! 한 번에 회색 여럿을 건지면 보너스.</p>
+      </div></div>
+    </div>
+
+    <div class="screen" id="result" hidden>
+      <div class="card"><h2 id="resTitle">러시 종료!</h2><div class="in">
+        <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><linearGradient id="starG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe680"/><stop offset=".55" stop-color="#ffc21f"/><stop offset="1" stop-color="#e88a0c"/></linearGradient></defs></svg><div class="stars" id="resStars"><svg viewBox="0 0 100 100" aria-hidden="true"><path d="M50 7 63.2 35.4 94 39.2 71.2 60.4 77.2 91 50 75.8 22.8 91 28.8 60.4 6 39.2 36.8 35.4Z" fill="url(#starG)" stroke="#24160c" stroke-width="6" stroke-linejoin="round"/><path d="M50 20 59 39.5 80 42.3 64.5 56.8" fill="none" stroke="#fff6c8" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" opacity=".75"/></svg><svg viewBox="0 0 100 100" aria-hidden="true"><path d="M50 7 63.2 35.4 94 39.2 71.2 60.4 77.2 91 50 75.8 22.8 91 28.8 60.4 6 39.2 36.8 35.4Z" fill="url(#starG)" stroke="#24160c" stroke-width="6" stroke-linejoin="round"/><path d="M50 20 59 39.5 80 42.3 64.5 56.8" fill="none" stroke="#fff6c8" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" opacity=".75"/></svg><svg viewBox="0 0 100 100" aria-hidden="true"><path d="M50 7 63.2 35.4 94 39.2 71.2 60.4 77.2 91 50 75.8 22.8 91 28.8 60.4 6 39.2 36.8 35.4Z" fill="url(#starG)" stroke="#24160c" stroke-width="6" stroke-linejoin="round"/><path d="M50 20 59 39.5 80 42.3 64.5 56.8" fill="none" stroke="#fff6c8" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" opacity=".75"/></svg></div>
+        <div class="big" id="resScore">0</div>
+        <div class="newbest" id="resBest" hidden>신기록!</div>
+        <div class="bonus" id="resBonus"></div>
+        <div class="stats">
+          <div><b id="rsCombo">0</b>최대 콤보</div>
+          <div><b id="rsChase">0</b>침입자 퇴치</div>
+          <div><b id="rsNet">0</b>건진 회색</div>
+        </div>
+        <div class="chips" id="resTro"></div>
+        <p class="hint" id="resNext"></p>
+        <button class="btn green" id="againBtn">한 판 더!</button>
+        <div class="row"><button class="btn stone" id="shareBtn">점수 복사</button><button class="btn stone" id="menuBtn">메뉴</button></div>
+      </div></div>
+    </div>
+
+    <div class="screen" id="troScr" hidden>
+      <div class="card"><h2>트로피 <span id="troCount" style="font-size:18px;color:var(--muted)"></span></h2><div class="in">
+        <div class="trophies" id="troGrid"></div>
+        <button class="btn stone" data-close>닫기</button>
+      </div></div>
+    </div>
+
+    <div class="screen" id="recScr" hidden>
+      <div class="card"><h2>명예의 전당</h2><div class="in">
+        <div id="recList"></div>
+        <p class="hint">이 기기에 저장된 상위 10개 기록이에요.</p>
+        <div class="row"><button class="btn stone" id="recReset">기록 초기화</button><button class="btn stone" data-close>닫기</button></div>
+      </div></div>
+    </div>
+
+    <div id="lockMsg" role="status" hidden></div>
+    <div id="toast" class="wood"><img id="toastImg" src="assets/cup_b.png" alt=""><div><div class="t1">트로피 획득</div><div class="t2" id="toastName"></div></div></div>
+  </div>
+  <div id="shop"></div>
+</div>
+
+<script>
+(()=>{
+'use strict';
+// ---------- persistence ----------
+const KEY='guppyrush.v2';
+const DEF={best:0,bestHard:0,bestEndless:0,coinsLife:0,chased:0,netted:0,sold:0,maxCombo:0,tro:{},records:[],theme:0,days:[],fresh:{}};
+let S;
+try{S=Object.assign({},DEF,JSON.parse(localStorage.getItem(KEY)||'{}'))}catch(e){S=Object.assign({},DEF)}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+const ymd=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+const today=()=>ymd(new Date());
+
+// ---------- utils ----------
+const $=id=>document.getElementById(id);
+const clamp=(v,a,b)=>v<a?a:v>b?b:v;
+const fmt=n=>Math.round(n).toLocaleString('ko-KR');
+const rand=Math.random;
+const INK='#24160c';
+
+// ---------- sound & haptics ----------
+let actx=null;
+function beep(f,d=.08,type='sine',v=.05,slide=0){
+  try{actx=actx||new(window.AudioContext||window.webkitAudioContext)();const t=actx.currentTime,o=actx.createOscillator(),g=actx.createGain();
+    o.type=type;o.frequency.setValueAtTime(f,t);if(slide)o.frequency.exponentialRampToValueAtTime(f*slide,t+d);
+    g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.0001,t+d);o.connect(g).connect(actx.destination);o.start(t);o.stop(t+d)}catch(e){}
+}
+const buzz=ms=>{try{navigator.vibrate&&navigator.vibrate(ms)}catch(e){}};
+
+// ---------- assets ----------
+const IMG={};
+const ASSETS=['bg.jpg','guppy_blue.png','guppy_gold.png','guppy_pink.png','guppy_red.png','guppy_lav.png','guppy_green.png','guppy_purple.png','guppy_gray.png',
+  'angel.png','discus.png','cory.png','net.png','gem.png','convict.png','oscar.png','piranha.png','cup_g.png','cup_s.png','cup_b.png','star.png','feed.png',
+  ...[0,1,2,3,4,5,6,7].map(i=>'shrimp'+i+'.png'),...[0,1,2,3,4,5,6].flatMap(i=>['gold'+i+'.png','silver'+i+'.png'])];
+const loadAll=()=>Promise.all(ASSETS.map(n=>new Promise(r=>{const i=new Image();i.onload=()=>{IMG[n.replace(/\.\w+$/,'')]=i;r()};i.onerror=r;i.src='assets/'+n})));
+
+// ---------- themes: the painted background, re-tinted ----------
+let curTheme=0;
+const THEMES=[
+  {name:'아마존 클리어워터',filter:'none'},
+  // light = how strong the drifting sunlight is; shade = an extra wash over the whole tank
+  {name:'아마존 블랙워터',filter:'sepia(.6) hue-rotate(-12deg) saturate(1.3) brightness(.62)',light:.55,shade:'rgba(18,8,0,.28)'},
+  {name:'달빛 수조',filter:'hue-rotate(45deg) saturate(.85) brightness(.82)'},
+  // endless: blood-red water with a slowly breathing dark vignette
+  {name:'핏빛 블랙워터',filter:'sepia(.9) hue-rotate(-45deg) saturate(3) brightness(.6) contrast(1.15)',light:.3,mult:'#ff3a30',shade:'rgba(50,0,0,.18)',pulse:true},
+];
+
+// ---------- guppy strains ----------
+const STRAINS=[
+  {name:'블루 모자이크',img:'guppy_blue'},{name:'골드 레이스',img:'guppy_gold'},{name:'핑크 화이트',img:'guppy_pink'},{name:'레드 테일',img:'guppy_red'},
+  {name:'라벤더 플래티넘',img:'guppy_lav'},{name:'그린 모자이크',img:'guppy_green'},{name:'퍼플 모자이크',img:'guppy_purple'},
+];
+
+// ---------- trophies ----------
+const TROPHIES=[
+  {id:'first',n:'첫 수확',d:'동전을 처음 줍기',t:'b'},
+  {id:'birth',n:'첫 출산',d:'구피가 새끼를 낳다',t:'b'},
+  {id:'chase1',n:'훠이훠이',d:'침입자 쫓아내기',t:'b'},
+  {id:'survive5',n:'끈질긴 수조',d:'무한 모드 5분 버티기',t:'b'},
+  {id:'combo10',n:'손이 빨라',d:'콤보 10',t:'b'},
+  {id:'double',n:'더블 건지기',d:'한 번에 회색 2마리 건지기',t:'b'},
+  {id:'frenzy',n:'브라인 파티',d:'한 판에 브라인쉬림프 10번',t:'b'},
+  {id:'sell',n:'첫 분양',d:'구피 10마리 분양하기',t:'b'},
+  {id:'color10',n:'컬러 패밀리',d:'컬러 구피 10마리 동시',t:'s'},
+  {id:'cory5',n:'코리 군단',d:'코리도라스 5마리',t:'s'},
+  {id:'piranha',n:'피라냐 퇴치',d:'블랙 피라냐 쫓아내기',t:'s'},
+  {id:'combo25',n:'번개 손가락',d:'콤보 25',t:'s'},
+  {id:'safe',n:'철벽 수조',d:'침입자에게 한 마리도 안 뺏기고 완주',t:'s'},
+  {id:'chase10',n:'뜰채 명인',d:'침입자 누적 10번 쫓아내기',t:'s',p:()=>[S.chased,10]},
+  {id:'picky',n:'품종 개량가',d:'회색 구피 누적 50마리 건지기',t:'s',p:()=>[S.netted,50]},
+  {id:'streak3',n:'개근상',d:'3일 연속 플레이',t:'s',p:()=>[streak(),3]},
+  {id:'color30',n:'구피 왕국',d:'컬러 구피 30마리 동시',t:'g'},
+  {id:'rainbow',n:'무지개 수조',d:'7가지 품종 동시 보유',t:'g'},
+  {id:'star3',n:'완벽한 수조',d:'별 3개 받기',t:'g'},
+  {id:'rich',n:'황금 어항',d:'누적 동전 100,000',t:'g',p:()=>[S.coinsLife,100000]},
+  {id:'combo50',n:'신의 손',d:'콤보 50',t:'g'},
+  {id:'survive15',n:'영원한 수조',d:'무한 모드 15분 버티기',t:'g'},
+  {id:'sell100',n:'구피 농장주',d:'누적 100마리 분양',t:'g',p:()=>[S.sold,100]},
+  {id:'streak7',n:'수족관 지킴이',d:'7일 연속 플레이',t:'g',p:()=>[streak(),7]},
+];
+const cupSrc=t=>'assets/cup_'+t+'.png';
+function streak(){const set=new Set(S.days);let n=0;const d=new Date();while(set.has(ymd(d))){n++;d.setDate(d.getDate()-1)}return n}
+let toastQ=[],toastBusy=false;
+function unlock(id){
+  if(S.tro[id])return;S.tro[id]=today();save();
+  const t=TROPHIES.find(x=>x.id===id);if(G)G.newTro.push(t);
+  toastQ.push(t);runToast();
+}
+function runToast(){
+  if(toastBusy||!toastQ.length)return;toastBusy=true;const t=toastQ.shift();
+  $('toastImg').src=cupSrc(t.t);$('toastName').textContent=t.n;$('toast').classList.add('show');
+  beep(880,.12,'triangle',.05);setTimeout(()=>beep(1320,.18,'triangle',.05),110);buzz(30);
+  setTimeout(()=>{$('toast').classList.remove('show');setTimeout(()=>{toastBusy=false;runToast()},400)},2200);
+}
+
+// ---------- modes & invaders ----------
+// 아마존 클리어워터: 3 minutes, normal. 아마존 블랙워터: 3 minutes, hard (adds the black piranha, two invaders at once).
+// 블랙워터 무한: no clock, all five on repeat and getting tougher. Every mode ends the moment the tank has no guppies.
+const MODES={
+  lake:{name:'아마존 클리어워터',theme:0,hpMul:1,maxMobs:1},
+  amazon:{name:'아마존 블랙워터',theme:1,hpMul:1.3,maxMobs:2},
+  endless:{name:'블랙워터 무한',theme:3,hpMul:1.1,maxMobs:2},
+};
+const SCHED={
+  lake:[{t:30,type:'convict'},{t:50,type:'discus'},{t:85,type:'angel'},{t:125,type:'oscar'},{t:160,type:'convict'}],
+  amazon:[{t:20,type:'convict'},{t:35,type:'discus'},{t:55,type:'piranha'},{t:85,type:'angel'},{t:105,type:'convict'},{t:120,type:'oscar'},{t:150,type:'piranha'}],
+};
+const ENDLESS_CYCLE=['convict','discus','angel','oscar','piranha'];
+
+// ---------- canvas ----------
+const cv=$('cv');let ctx=cv.getContext('2d');
+const bgc=document.createElement('canvas');
+const W=400;let H=700,SC=1,SAND=70;
+let deco={bubbles:[],motes:[]};
+function resize(){
+  const r=$('stage').getBoundingClientRect();const dpr=Math.min(window.devicePixelRatio||1,2);
+  cv.width=Math.max(1,Math.round(r.width*dpr));cv.height=Math.max(1,Math.round(r.height*dpr));SC=cv.width/W;H=cv.height/SC;
+  SAND=Math.round(H*.1);
+  const R=Math.random;
+  deco.bubbles=Array.from({length:8},()=>({y:R()*H,r:1.5+R()*2.5,v:40+R()*40,ph:R()*6}));
+  deco.motes=Array.from({length:24},()=>({x:R()*W,y:R()*H,r:.6+R()*1.2,v:3+R()*6,ph:R()*6}));
+  buildBG();
+}
+window.addEventListener('resize',resize);
+// background painted once per size/theme: cover-fit, tinted by the theme filter
+function buildBG(){
+  const b=IMG.bg;bgc.width=cv.width;bgc.height=cv.height;if(!b)return;
+  const c=bgc.getContext('2d'),k=Math.max(bgc.width/b.width,bgc.height/b.height),w=b.width*k,h=b.height*k;
+  try{c.filter=(THEMES[curTheme]||THEMES[0]).filter}catch(e){}
+  c.drawImage(b,(bgc.width-w)/2,bgc.height-h,w,h);c.filter='none';
+  // theme tints are baked in once here (no per-frame cost): a multiply wash, a shade, and for the blood-red tank a dark vignette
+  const th=THEMES[curTheme]||THEMES[0],BW=bgc.width,BH=bgc.height;
+  if(th.mult){c.globalCompositeOperation='multiply';c.fillStyle=th.mult;c.fillRect(0,0,BW,BH);c.globalCompositeOperation='source-over'}
+  if(th.shade){c.fillStyle=th.shade;c.fillRect(0,0,BW,BH)}
+  if(th.pulse){const vg=c.createRadialGradient(BW/2,BH*.45,Math.min(BW,BH)*.25,BW/2,BH*.45,Math.max(BW,BH)*.75);vg.addColorStop(0,'rgba(60,0,0,0)');vg.addColorStop(1,'rgba(30,0,0,.62)');c.fillStyle=vg;c.fillRect(0,0,BW,BH)}
+}
+
+// draw a right-facing fish image centred at x,y; the tail (left `split` of the width) bends in a travelling wave,
+// drawn as thin vertical strips so the body and tail never come apart at a seam
+// the front `head` of the width (the snout) can wave too, with its own phase and amplitude; nothing is ever squashed
+function fish(img,x,y,w,face,ph,amp,split,flipY,head=0,hph=0,hamp=0){
+  if(!img)return;const iw=img.width,ih=img.height,k=w/iw,h=ih*k,sx=Math.round(iw*split),hx=Math.round(iw*(1-head)),x0=-w/2,y0=-h/2,st=Math.max(2,Math.round(2.5/k));
+  ctx.save();ctx.translate(x,y);ctx.scale(face,flipY?-1:1);
+  ctx.drawImage(img,sx,0,hx-sx,ih,x0+sx*k,y0,(hx-sx)*k,h);
+  for(let c=0;c<sx;c+=st){const sw=Math.min(st,sx-c),u=1-c/sx,off=Math.sin(ph-u*2.4)*amp*h*u*u;ctx.drawImage(img,c,0,sw,ih,x0+c*k,y0+off,sw*k+.6,h)}
+  for(let c=hx;c<iw;c+=st){const sw=Math.min(st,iw-c),u=(c-hx)/(iw-hx),off=headOff(u,hph,hamp,h);ctx.drawImage(img,c,0,sw,ih,x0+c*k,y0+off,sw*k+.6,h)}
+  ctx.restore();
+}
+const headOff=(u,hph,hamp,h)=>Math.sin(hph-u*2)*hamp*h*u*u;
+function sprite(img,x,y,w,flip=1,rot=0){if(!img)return;const h=w*img.height/img.width;ctx.save();ctx.translate(x,y);if(rot)ctx.rotate(rot);ctx.scale(flip,1);ctx.drawImage(img,-w/2,-h/2,w,h);ctx.restore()}
+// height-based, so the narrow edge-on coin frames stay narrow instead of being stretched to full width
+function spriteH(img,x,y,h){if(!img)return;const w=h*img.width/img.height;ctx.drawImage(img,x-w/2,y-h/2,w,h)}
+
+// ---------- game state ----------
+let G=null,paused=true,last=0,clock=0;
+const COST={guppy:120,cory:150,shrimp:100},CAP=40;
+const GW=[24,38,54];   // guppy draw width by life stage
+// sizes run 컨빅트 < 디스커스 < 알텀엔젤 < 오스카 < 블랙 피라냐; each has its own way of moving (b) and striking
+// wind = how long it rears back before striking, lv/ldur = strike speed and length, reach = how far away it starts a strike
+const MOB={
+  // smallest and hot-tempered: guards a circle of water and dashes at any young guppy that swims in
+  convict:{name:'컨빅트 시클리드',img:'convict',w:64,split:.22,r:22,hp:n=>5+n*2,spd:n=>70+n*4,cd:1.3,stay:34,gems:1,pts:300,kb:110,flee:90,small:true,b:'territory',wind:.12,lv:480,ldur:.25,reach:130},
+  // slow drifter that sucks small guppies into its mouth
+  discus:{name:'디스커스',img:'discus',w:86,split:.18,r:30,hp:n=>6+n*2,spd:n=>Math.min(50,30+n*4),cd:3,stay:36,gems:1,pts:250,kb:120,flee:100,small:true,b:'hover',wind:.35,lv:150,ldur:.6,reach:110},
+  // climbs above its prey and dives straight down
+  angel:{name:'알텀엔젤',img:'angel',w:96,split:.2,r:34,hp:n=>10+n*3,spd:n=>Math.min(120,85+n*6),cd:2,stay:32,gems:2,pts:500,kb:90,flee:130,b:'dive',wind:.2,lv:520,ldur:.45,reach:260},
+  // heavy, hard to push, long wind-up, swallows up to two at once, then dozes on the bottom
+  oscar:{name:'오스카',img:'oscar',w:120,split:.2,r:42,hp:n=>18+n*5,spd:n=>Math.min(85,62+n*4),cd:3.2,stay:34,gems:3,pts:800,kb:45,flee:120,adults:true,b:'gulp',wind:.5,lv:400,ldur:.4,reach:150},
+  // the boss: circles, jinks, bites twice in a row and gets faster with every meal
+  piranha:{name:'블랙 피라냐',img:'piranha',w:140,split:.18,r:48,hp:n=>14+n*4,spd:n=>Math.min(160,115+n*6),cd:4.5,stay:24,gems:4,pts:1200,kb:35,flee:160,adults:true,boss:true,b:'frenzy',eye:[.875,.5],wind:.25,lv:520,ldur:.28,reach:130},
+};
+function newGame(mode){
+  const endless=mode==='endless';
+  G={mode,endless,t:0,dur:endless?Infinity:180,money:150,score:0,fish:[],cory:[],food:[],coins:[],fx:[],txt:[],mobs:[],
+    sched:endless?[]:SCHED[mode].map(m=>({...m})),mobI:0,mobN:{convict:0,discus:0,angel:0,oscar:0,piranha:0},nextMob:20,water:100,netLv:2,shrimpCd:0,shrimpUses:0,chk:1,shake:0,frenzy:false,drain:0,
+    combo:0,comboT:0,maxCombo:0,eaten:0,chased:0,births:0,netted:0,lostColor:0,penalty:0,sold:0,trail:[],swipe:null,netHead:null,sid:0,over:false,banner:null,newTro:[],
+    coinMul:1,hungerMul:1,foodCost:5,mobMul:1,breedMul:1,grayP:.25};
+  G.mobMul=MODES[mode].hpMul;curTheme=MODES[mode].theme;buildBG();
+  addGuppy(1,null,null,'color');addGuppy(1,null,null,'color');addGuppy(1,null,null,'color');
+  const d=today();if(!S.days.includes(d)){S.days.push(d);S.days=S.days.slice(-30);save()}
+  if(streak()>=3)unlock('streak3');if(streak()>=7)unlock('streak7');
+  buildShop();
+}
+// colourful fry take the parent's strain half the time; any birth has a grayP chance of coming out gray
+function addGuppy(stage,x,y,force,parentPal){
+  const born=x!=null;
+  const kind=force||(rand()<G.grayP?'gray':'color');
+  const pal=parentPal!=null&&rand()<.5?parentPal:(rand()*STRAINS.length)|0;
+  const f={kind,pal,stage,growth:[0,2,5][stage],x:born?x:60+rand()*(W-120),y:born?y:-20,tx:0,ty:0,vx:born?(rand()-.5)*60:0,vy:born?(rand()-.5)*40:40,
+    dir:1,face:1,hunger:born?.2:.32,drop:3+rand()*3,breed:12+rand()*6,ph:rand()*6,wT:0,dead:0,pop:1};
+  pickTarget(f);G.fish.push(f);return f;
+}
+const fishR=f=>[7,11,15][f.stage];
+const guppyImg=f=>IMG[f.kind==='gray'?'guppy_gray':STRAINS[f.pal].img];
+function pickTarget(f){f.tx=30+rand()*(W-60);f.ty=60+rand()*(H-SAND-130);f.wT=2+rand()*3}
+function tank(){let color=0,gray=0;const pals=new Set();for(const f of G.fish){if(f.dead)continue;if(f.kind==='gray')gray++;else{color++;pals.add(f.pal)}}return{color,gray,cory:G.cory.length,strains:pals.size}}
+function checkTank(){const n=tank();if(n.color>=10)unlock('color10');if(n.color>=30)unlock('color30');if(n.cory>=5)unlock('cory5');if(n.strains>=STRAINS.length)unlock('rainbow')}
+function spawnCoin(x,y,kind){G.coins.push({x,y,kind,val:{silver:15,gold:40,gem:250}[kind]*G.coinMul,rest:0,vx:(rand()-.5)*20,ph:rand()*6})}
+function floatText(x,y,s,col='#fff',size=16){G.txt.push({x,y,s,col,size,life:1})}
+function sparkle(x,y,col,n=8){for(let i=0;i<n;i++){const a=rand()*7,v=40+rand()*90;G.fx.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v,life:.5+rand()*.3,col,r:1.5+rand()*1.5})}}
+function banner(s,col='#fff'){G.banner={s,col,life:1.8}}
+
+function collect(c,byCory){
+  G.coins.splice(G.coins.indexOf(c),1);
+  G.money+=c.val;S.coinsLife+=c.val;unlock('first');
+  let mult=1;
+  if(!byCory){
+    G.combo=G.comboT>0?G.combo+1:1;G.comboT=1.6;G.maxCombo=Math.max(G.maxCombo,G.combo);
+    mult=1+Math.min(G.combo-1,20)*.1;
+    if(G.combo===10)unlock('combo10');if(G.combo===25)unlock('combo25');if(G.combo===50)unlock('combo50');
+    if(G.combo%10===0){banner('콤보 x'+G.combo+'!','#ffd75a');beep(660,.2,'square',.03,1.5)}
+    beep(700+Math.min(G.combo,30)*28,.06,'triangle',.05);
+  }else beep(520,.05,'triangle',.025);
+  const pts=Math.round(c.val*mult);G.score+=pts;
+  floatText(c.x,c.y-10,'+'+pts,mult>1.5?'#ffd75a':'#fff',mult>1.5?18:15);
+  sparkle(c.x,c.y,c.kind==='gem'?'#ff8a8a':'#ffd75a',6);
+  if(S.coinsLife>=100000)unlock('rich');
+}
+function spawnMob(type){
+  const M=MOB[type],n=++G.mobN[type],L=rand()<.5,hp=Math.round(M.hp(n)*G.mobMul);
+  G.mobs.push({type,M,x:L?-80:W+80,y:120+rand()*Math.max(40,H-SAND-320),vx:0,vy:0,scare:0,max:hp,t:0,cd:1.5,hit:0,fleeing:false,fdir:0,dir:L?1:-1,face:L?1:-1,n,
+    wind:0,lunge:0,ltg:null,chomp:0,stretch:0,full:0,frenzy:0,combo:0,orb:rand()*7,jig:0,hx:80+rand()*(W-160),hy:H*.45+rand()*Math.max(20,H*.55-SAND-60)});
+  const [msg,col]={convict:['컨빅트가 영역을 잡았다!','#cfe3ff'],discus:['디스커스가 어슬렁…','#ffd8c8'],angel:['알텀엔젤! 위에서 내리꽂아요','#ffd0c4'],
+    oscar:['오스카 출현! 한입이 커요','#ffc79a'],piranha:['블랙 피라냐 출현!!','#ff9a8a']}[type];
+  banner(msg,col);
+  if(M.boss){G.shake=.6;beep(110,.6,'sawtooth',.06,.5);buzz([60,40,60,40,90])}else{beep(170,.4,'triangle',.05,.6);buzz([40,40])}
+}
+function eat(f,nf){
+  G.food.splice(G.food.indexOf(nf),1);f.hunger=0;
+  if(nf.type==='shrimp'){f.boost=5;f.shN=(f.shN||0)+1;if(f.shN>=3){f.full=4;f.shN=0;floatText(f.x,f.y-18,'배불러!','#ffe9c4',12)}}beep(nf.type==='shrimp'?620:500,.04,'sine',.03,.7);
+  if(f.stage<2){f.growth+=1;const ns=f.growth>=5?2:f.growth>=2?1:0;
+    if(ns>f.stage){f.stage=ns;f.pop=1;sparkle(f.x,f.y,'#fff',8);floatText(f.x,f.y-18,ns===2?'성어!':'쑥쑥!','#fff',13);if(f.drop>5)f.drop=2}}
+}
+function killFish(f,why){
+  if(f.dead)return;f.dead=.001;sparkle(f.x,f.y,'#e6ddd0',8);
+  floatText(f.x,f.y-18,why==='eaten'?'앙! 잡아먹혔다':'배고파…','#ffe0d6',13);beep(200,.25,'sine',.05,.5);
+}
+
+// ----- tap: coins and food only -----
+function grabCoin(px,py){
+  if(!G||paused||G.over)return false;
+  let best=null,bd=32;
+  for(const c of G.coins){const d=Math.hypot(c.x-px,c.y-py);if(d<bd){bd=d;best=c}}
+  if(best){collect(best,false);return true}
+  return false;
+}
+const PELLETS_MAX=3;   // one pellet per tap, at most three sinking at once
+function feed(px,py){
+  if(!G||paused||G.over||py>H-SAND-6)return;
+  if(G.food.filter(f=>f.type==='pellet').length>=PELLETS_MAX){floatText(px,py,'사료 한도','#ffe0d6',13);return}
+  if(G.money<G.foodCost){floatText(px,py,'동전 부족','#ffe0d6',13);return}
+  G.money-=G.foodCost;
+  G.food.push({type:'pellet',x:clamp(px,8,W-8),y:py,rest:0});
+  beep(330,.05,'sine',.04,1.3);
+}
+function tap(px,py){if(!grabCoin(px,py))feed(px,py)}
+
+// ----- net: swipe through the water to scoop; anything the path crosses goes in -----
+const netCap=()=>1+G.netLv;
+function segDist(px,py,a,b){const dx=b[0]-a[0],dy=b[1]-a[1],l=dx*dx+dy*dy||1,k=clamp(((px-a[0])*dx+(py-a[1])*dy)/l,0,1);return Math.hypot(px-a[0]-dx*k,py-a[1]-dy*k)}
+function netStart(x,y){
+  if(!G||paused||G.over)return;
+  G.sid++;G.swipe={pts:[[x,y]],n:0,gray:0,color:0,hits:new Set()};G.netHead={x,y,ang:0};G.trail.push({x,y,life:.3,sid:G.sid});beep(420,.08,'sine',.025,1.6);
+}
+function netMove(x,y){
+  const s=G&&G.swipe;if(!s)return;const p=s.pts[s.pts.length-1],q=[x,y];if(Math.hypot(x-p[0],y-p[1])<2)return;
+  s.pts.push(q);G.netHead={x,y,ang:Math.atan2(y-p[1],x-p[0])};G.trail.push({x,y,life:.3,sid:G.sid});
+  for(let i=G.fish.length-1;i>=0&&s.n<netCap();i--){const f=G.fish[i];if(!f.dead&&segDist(f.x,f.y,p,q)<fishR(f)+8)scoop(f,s)}
+  for(const m of G.mobs)if(!m.fleeing&&!s.hits.has(m)&&segDist(m.x,m.y,p,q)<m.M.r+8){s.hits.add(m);hitMob(m,x-p[0],y-p[1])}
+}
+function scoop(f,s){
+  G.fish.splice(G.fish.indexOf(f),1);s.n++;
+  const h=G.netHead||{x:f.x,y:f.y};(G.caught||(G.caught=[])).push({f,sx:f.x,sy:f.y,nx:h.x,ny:h.y,t:0});
+  if(f.kind==='gray'){s.gray++;G.netted++;S.netted++;if(S.netted>=50)unlock('picky');G.score+=20;floatText(f.x,f.y-16,'쏙! +20','#e9ffd8',14);beep(760+s.gray*120,.06,'sine',.04,.6);buzz(8)}
+  else{const pen=[30,60,100][f.stage];s.color++;G.lostColor++;G.combo=0;G.comboT=0;G.penalty+=Math.min(pen,G.score);G.score=Math.max(0,G.score-pen);
+    floatText(f.x,f.y-16,'앗! '+STRAINS[f.pal].name+' -'+pen,'#ff9a8a',15);beep(220,.3,'triangle',.05,.6);buzz([30,30,60])}
+}
+function netEnd(){
+  const s=G&&G.swipe;if(!s)return;G.swipe=null;G.netHead=null;
+  if(s.gray>=2){const b=[0,0,60,150,300,500][Math.min(s.gray,5)];G.score+=b;unlock('double');
+    banner((s.gray===2?'더블':s.gray===3?'트리플':'싹쓸이')+' 건지기! +'+b,'#e9ffd8')}
+}
+function hitMob(m,dx,dy){
+  const d=Math.hypot(dx,dy)||1,kb=m.M.kb;m.scare+=G.netLv*(m.full>0?2:1);m.hit=.3;m.hfx=.28;m.combo=0;(G.rings||(G.rings=[])).push({x:m.x,y:m.y,life:.3});sparkle(m.x,m.y,'#ffffff',5);if(m.wind>0||m.lunge>0){m.wind=0;m.lunge=0;m.ltg=null;m.cd=Math.max(m.cd,.8)}m.vx+=dx/d*kb;m.vy+=dy/d*kb;if(m.M.boss)G.shake=Math.max(G.shake,.12);
+  floatText(m.x,m.y-m.M.r-14,['훠이!','저리 가!','휙!','퍽!'][(rand()*4)|0],'#fff',15);beep(m.M.boss?160:260,.07,'square',.04,.7);buzz(14);
+  if(m.scare>=m.max){
+    m.fleeing=true;m.fdir=m.x<W/2?-1:1;G.chased++;S.chased++;unlock('chase1');if(S.chased>=10)unlock('chase10');if(m.type==='piranha')unlock('piranha');
+    for(let i=0;i<m.M.gems;i++)spawnCoin(m.x-12+i*12,m.y,'gem');G.score+=m.M.pts;floatText(m.x,m.y-m.M.r-30,(m.M.boss?'대왕 토벌! +':'쫓아냈다! +')+m.M.pts,'#ffd75a',m.M.boss?24:20);
+    sparkle(m.x,m.y,'#fff3c4',m.M.boss?30:18);if(m.M.boss)G.shake=.4;beep(392,.12,'triangle',.06);setTimeout(()=>beep(587,.12,'triangle',.06),100);setTimeout(()=>beep(784,.2,'triangle',.06),200);buzz(60);
+  }
+}
+function swipeAll(pts){netStart(pts[0][0],pts[0][1]);for(const p of pts.slice(1))netMove(p[0],p[1]);netEnd()}
+function pourShrimp(){
+  for(let i=0;i<44;i++)G.food.push({type:'shrimp',x:20+rand()*(W-40),y:40+rand()*(H-SAND-120),vx:(rand()-.5)*40,vy:(rand()-.5)*40,life:5+rand()*2.5,age:0,ph:rand()*6});
+  G.shrimpUses++;if(G.shrimpUses>=10)unlock('frenzy');
+  banner('브라인쉬림프 투하! 구피들 흥분!','#ffc6a8');sparkle(W/2,80,'#ffb48f',16);
+}
+
+// who an invader goes after: discus and convict only take the young (the convict only inside its circle);
+// oscar and piranha prefer adults; the angel takes whatever is closest and small
+function pickPrey(m){
+  const M=m.M;let tg=null,best=1e9;
+  for(const f of G.fish){if(f.dead||(M.small&&f.stage===2))continue;
+    if(M.b==='territory'&&Math.hypot(f.x-m.hx,f.y-m.hy)>110)continue;
+    const d=Math.hypot(f.x-m.x,f.y-m.y)+(M.adults?-f.stage*60:f.stage*60);if(d<best){best=d;tg=f}}
+  return tg;
+}
+function bite(m,g,mx){
+  const M=m.M;killFish(g,'eaten');G.eaten++;m.chomp=.4;
+  sparkle(mx,m.y,'#ffffff',10);floatText(mx,m.y-M.r-6,'덥석!','#ff9a86',18);
+  beep(M.boss?180:330,.05,'square',.06,.4);setTimeout(()=>beep(M.boss?120:200,.08,'sine',.05,.6),60);buzz(M.boss?[50,30,70]:80);
+  if(M.w>=110)G.shake=Math.max(G.shake,.15);
+}
+// every strike runs the same beats: rear back (wind) → dart mouth-first (lunge) → snap (chomp) or miss;
+// how an invader gets into position before that is its own (see the switch below)
+function updateMob(m,dt){
+  const M=m.M;m.t+=dt;m.hit=Math.max(0,m.hit-dt);m.hfx=Math.max(0,(m.hfx||0)-dt);m.cd-=dt;m.chomp=Math.max(0,m.chomp-dt);
+  if(m.fleeing){m.vx+=(m.fdir*320-m.vx)*Math.min(1,dt*3);m.vy+=(-30-m.vy)*Math.min(1,dt*2);m.x+=m.vx*dt;m.y+=m.vy*dt;
+    m.dir=m.fdir;m.face+=(m.dir-m.face)*Math.min(1,dt*6);m.stretch*=.9;return !(m.x<-160||m.x>W+160)}
+  if(m.t>M.stay&&!m.wind&&!m.lunge){m.fleeing=true;m.fdir=m.x<W/2?-1:1;banner(M.name+'(이)가 배불러 떠났다…','#f2ece0');return true}
+  if(m.full>0)m.full-=dt;
+  if(m.ltg&&m.ltg.dead){m.ltg=null;m.wind=0;m.lunge=0}
+  const mouthX=()=>m.x+m.face*M.w*.42,fz=m.frenzy;
+  const sp=(M.spd(m.n)+fz*25)*(m.hit>0?.3:1)*(m.full>0?.35:1);
+  const endStrike=hit=>{
+    m.lunge=0;const g=m.ltg;m.ltg=null;
+    // piranha follows up with a second bite straight away
+    if(M.b==='frenzy'&&m.combo<1){const g2=hit?pickPrey(m):g;if(g2&&!g2.dead&&Math.hypot(g2.x-m.x,g2.y-m.y)<M.reach+60){m.combo++;m.ltg=g2;m.wind=.12;return}}
+    m.combo=0;m.cd=hit?M.cd*(1-fz*.08):.9;
+  };
+  if(m.wind>0){
+    m.wind-=dt;const g=m.ltg;m.vx*=.8;m.vy*=.8;
+    if(g){const dx=g.x-m.x,dy=g.y-m.y,d=Math.hypot(dx,dy)||1;m.dir=dx>0?1:-1;m.vx-=dx/d*540*dt;m.vy-=dy/d*540*dt}
+    m.stretch=M.b==='gulp'?-.18:-.12;
+    if(m.wind<=0&&g){m.lunge=M.ldur;beep(M.boss?140:220,.08,'sawtooth',.035,1.8)}
+  }else if(m.lunge>0){
+    m.lunge-=dt;const g=m.ltg;
+    if(!g){m.lunge=0;m.cd=.6}
+    else{const mx=mouthX(),dx=g.x-mx,dy=g.y-m.y,d=Math.hypot(dx,dy)||1;
+      m.vx=dx/d*M.lv;m.vy=dy/d*M.lv;m.dir=dx>0?1:-1;m.stretch=M.b==='hover'?.06:.18;
+      // discus: the prey gets dragged toward the mouth while it sucks
+      if(M.b==='hover'){g.x+=(mx-g.x)/d*170*dt;g.y+=(m.y-g.y)/d*170*dt;if(rand()<dt*20)G.fx.push({x:g.x,y:g.y,vx:(mx-g.x)*2,vy:(m.y-g.y)*2,life:.3,col:'rgba(220,245,255,.8)',r:1.5})}
+      if(d<fishR(g)+(M.b==='gulp'?26:16)){
+        bite(m,g,mx);
+        if(M.b==='gulp'){
+          // oscar: one more guppy close to the mouth goes down too, then it gets sleepy
+          const g2=G.fish.find(f=>!f.dead&&Math.hypot(f.x-mx,f.y-m.y)<48);if(g2)bite(m,g2,mx);
+          m.full=3.5;floatText(m.x,m.y-M.r-24,'배불러…','#e8f4ff',15);
+        }
+        if(M.b==='frenzy'&&m.frenzy<3){m.frenzy++;floatText(m.x,m.y-M.r-24,'광폭화 x'+m.frenzy+'!','#ff7a6a',18)}
+        m.vx*=.15;m.vy*=.15;endStrike(true);
+      }else if(m.lunge<=0){floatText(m.x,m.y-M.r-6,'헛물!','#e8e8e8',14);m.vx*=.3;m.vy*=.3;endStrike(false)}
+    }
+  }else{
+    const tg=m.full>0?null:pickPrey(m);let tx,ty,k,can=false;
+    switch(M.b){
+      case 'territory':{ // patrols a small loop around home; home creeps toward the nearest guppy
+        m.orb+=dt*1.6;let nf=null,nd=1e9;for(const f of G.fish){if(f.dead)continue;const d=Math.hypot(f.x-m.hx,f.y-m.hy);if(d<nd){nd=d;nf=f}}
+        if(nf&&nd>90){const a=Math.min(1,18*dt/nd);m.hx+=(nf.x-m.hx)*a;m.hy+=(nf.y-m.hy)*a}
+        m.hx=clamp(m.hx,60,W-60);m.hy=clamp(m.hy,100,H-SAND-50);
+        if(tg){tx=tg.x;ty=tg.y;k=Math.min(1,dt*3);can=true}else{tx=m.hx+Math.cos(m.orb)*55;ty=m.hy+Math.sin(m.orb)*30;k=Math.min(1,dt*2)}
+        break}
+      case 'hover':{ // lazy drift with a big slow bob
+        tx=tg?tg.x:W/2;ty=(tg?tg.y:H*.4)+Math.sin(m.t*1.3)*40;k=Math.min(1,dt*.8);can=!!tg;break}
+      case 'dive':{ // climbs above the prey, lines up, then dives
+        if(tg){tx=tg.x-m.dir*30;ty=Math.max(70,tg.y-160);can=m.y<tg.y-60&&Math.abs(m.x-tg.x)<120}else{tx=W/2+Math.sin(m.t*.7)*120;ty=110}
+        k=Math.min(1,dt*1.6);break}
+      case 'gulp':{ // ponderous; sinks to the bottom to doze after a meal
+        if(m.full>0){tx=m.x;ty=H-SAND-60}else{tx=tg?tg.x:W/2;ty=tg?tg.y:H*.5;can=!!tg}
+        k=Math.min(1,dt*.6);break}
+      case 'frenzy':{ // circles the prey, tightening as it frenzies, with sudden jinks
+        m.orb+=dt*(1.8+fz*.4);m.jig-=dt;if(m.jig<=0){m.jig=.35+rand()*.4;m.vx+=(rand()-.5)*260;m.vy+=(rand()-.5)*200}
+        if(tg){const R=Math.max(70,130-fz*15);tx=tg.x+Math.cos(m.orb)*R;ty=tg.y+Math.sin(m.orb)*R*.6;can=true}else{tx=W/2+Math.cos(m.orb)*120;ty=H*.4+Math.sin(m.orb)*80}
+        k=Math.min(1,dt*2.2);break}
+    }
+    const dx=tx-m.x,dy=ty-m.y,d=Math.hypot(dx,dy)||1,v=Math.min(sp,d*3);m.vx+=(dx/d*v-m.vx)*k;m.vy+=(dy/d*v-m.vy)*k;
+    if(can&&m.cd<=0&&m.hit<=0&&Math.hypot(tg.x-m.x,tg.y-m.y)<M.reach){m.ltg=tg;m.wind=M.wind}
+  }
+  m.stretch+=(0-m.stretch)*Math.min(1,dt*(m.lunge>0||m.wind>0?0:8));
+  m.x=clamp(m.x+m.vx*dt,-80,W+80);m.y=clamp(m.y+m.vy*dt,40,H-SAND-30);
+  if(!m.wind&&!m.lunge&&Math.abs(m.vx)>6)m.dir=m.vx>0?1:-1;
+  m.face+=(m.dir-m.face)*Math.min(1,dt*(m.wind>0||m.lunge>0?18:M.b==='gulp'?3:6));
+  return true;
+}
+
+function update(dt){
+  const t=G.t+=dt;
+  if(G.comboT>0){G.comboT-=dt;if(G.comboT<=0)G.combo=0}
+  if(G.shrimpCd>0)G.shrimpCd-=dt;
+  G.shake=Math.max(0,G.shake-dt);
+  const active=G.mobs.filter(m=>!m.fleeing).length;
+  if(G.endless){
+    // endless: all five on repeat; the gap shrinks from 30 s to 16 s, two at a time after 3 minutes,
+    // hit points climb gently, and more gray guppies are born as the run goes on
+    G.mobMul=MODES.endless.hpMul*(1+t/600);G.grayP=Math.min(.45,.25+t/1200);
+    if(active<(t>180?2:1)&&t>=G.nextMob){spawnMob(ENDLESS_CYCLE[G.mobI%ENDLESS_CYCLE.length]);G.mobI++;G.nextMob=t+Math.max(16,30-G.mobI*.7)}
+    if(t>=300)unlock('survive5');if(t>=900)unlock('survive15');
+  }else if(G.mobI<G.sched.length&&t>=G.sched[G.mobI].t&&active<MODES[G.mode].maxMobs)spawnMob(G.sched[G.mobI++].type);
+  if((G.chk-=dt)<=0){G.chk=1;checkTank()}
+  const bottom=H-SAND+6;
+  let frenzy=false;
+  for(let i=G.food.length-1;i>=0;i--){const f=G.food[i];
+    if(f.type==='shrimp'){frenzy=true;f.age+=dt;f.life-=dt;f.vx+=(rand()-.5)*160*dt;f.vy+=(rand()-.5)*160*dt;f.vx*=.97;f.vy*=.97;f.x=clamp(f.x+f.vx*dt,10,W-10);f.y=clamp(f.y+(f.vy+5)*dt,30,bottom-14);if(f.life<=0)G.food.splice(i,1)}
+    else if(f.y<bottom-4)f.y+=48*dt;else if((f.rest+=dt)>2.5)G.food.splice(i,1)}
+  G.frenzy=frenzy;
+  // water fouls with the square of the head count: twice the guppies, four times the mess (20 → ~0.8%/s, 40 → ~2.9%/s);
+  // below 30% guppies slow down and stop making coins
+  const dirty=G.water<30,nf=G.fish.length;
+  G.water=Math.max(0,G.water-(.15+.0017*nf*nf)*dt);
+  if(!dirty&&G.water<30){banner('수질 악화! 물갈이가 필요해요','#e0e6a0');beep(160,.3,'triangle',.05,.8);buzz([30,30])}
+  let alive=0;for(const f of G.fish)if(!f.dead)alive++;
+  for(let i=G.fish.length-1;i>=0;i--){
+    const f=G.fish[i],gray=f.kind==='gray';
+    if(f.dead){f.dead+=dt;f.y-=22*dt;if(f.dead>2)G.fish.splice(i,1);continue}
+    f.pop=Math.max(0,f.pop-dt*2);if(f.full>0)f.full-=dt;if(f.boost>0)f.boost-=dt;
+    f.hunger+=dt/26*G.hungerMul*(gray?2:1);   // gray guppies eat twice as much
+    if(f.hunger>=1){killFish(f,'starve');alive--;continue}
+    const hungry=f.hunger>.3;let sp=f.stage===0?55:45,busy=false;
+    for(const m of G.mobs){if(m.fleeing||m.full>0)continue;const d=Math.hypot(f.x-m.x,f.y-m.y);if(d<m.M.flee){busy=true;f.tx=clamp(f.x+(f.x-m.x)*1.5,20,W-20);f.ty=clamp(f.y+(f.y-m.y)*1.5,30,H-SAND-30);sp=100;break}}
+    // fish shy away from the net head; colourful guppies dodge quicker than the gray ones
+    if(!busy&&G.netHead){const h=G.netHead,d=Math.hypot(f.x-h.x,f.y-h.y);if(d<75){busy=true;f.tx=clamp(f.x+(f.x-h.x)*2,20,W-20);f.ty=clamp(f.y+(f.y-h.y)*2,30,H-SAND-30);sp=gray?110:160}}
+    if(!busy&&G.food.length){
+      let nf=null,nd=1e9;for(const fd of G.food){if(fd.type==='shrimp'?f.full>0:!hungry)continue;const d=Math.hypot(fd.x-f.x,fd.y-f.y);if(d<nd){nd=d;nf=fd}}
+      if(nf){busy=true;f.tx=nf.x;f.ty=nf.y;sp=(nf.type==='shrimp'?130:110)*(gray?1.25:1);if(nd<fishR(f)+7)eat(f,nf)}
+    }
+    if(frenzy)sp*=1.5;
+    if(dirty)sp*=.55;
+    if(!busy){f.wT-=dt;if(f.wT<=0||Math.hypot(f.tx-f.x,f.ty-f.y)<12)pickTarget(f)}
+    const dx=f.tx-f.x,dy=f.ty-f.y,d=Math.hypot(dx,dy)||1,k=Math.min(1,dt*(frenzy?4:2.6));
+    f.vx+=(dx/d*sp-f.vx)*k;f.vy+=(dy/d*sp*.8-f.vy)*k;
+    f.x=clamp(f.x+f.vx*dt,16,W-16);f.y=clamp(f.y+f.vy*dt,24,H-SAND-14);
+    if(Math.abs(f.vx)>6)f.dir=f.vx>0?1:-1;f.face+=(f.dir-f.face)*Math.min(1,dt*10);
+    if(!gray&&f.stage>0&&!dirty){f.drop-=dt*(f.boost>0?1.5:1);if(f.drop<=0){spawnCoin(f.x,f.y+fishR(f),f.stage===2?'gold':'silver');f.drop=(f.stage===2?7:8)+rand()*2}}
+    if(f.stage===2&&f.hunger<.6){f.breed-=dt*G.breedMul;if(f.breed<=0){f.breed=16+rand()*8;
+      if(alive<CAP){const n=rand()<.4?2:1;for(let j=0;j<n&&alive<CAP;j++){addGuppy(0,f.x-f.dir*12,f.y+4,null,gray?null:f.pal);alive++}
+        G.births++;floatText(f.x,f.y-18,'출산!','#ffe3f0',13);sparkle(f.x-f.dir*12,f.y,'#ffe3f0',5);unlock('birth');beep(990,.06,'sine',.035,1.4)}}}
+  }
+  for(let i=G.mobs.length-1;i>=0;i--)if(!updateMob(G.mobs[i],dt))G.mobs.splice(i,1);
+  // each corydoras claims its own coin, and they keep a little elbow room, so a school spreads across the floor
+  const claimed=new Set();
+  for(const k of G.cory){
+    k.snuff=Math.max(0,k.snuff-dt);k.age+=dt;const kg=Math.min(1,k.age/60);if(kg>=1&&k.g<1)floatText(k.x,H-SAND-10,'다 컸다!','#e9ffd8',13);k.g=kg;
+    let tg=null,td=1e9;for(const c of G.coins){if(c.y<H-SAND-80||claimed.has(c))continue;const d=Math.abs(c.x-k.x)+(bottom-c.y)*.5;if(d<td){td=d;tg=c}}
+    if(tg)claimed.add(tg);
+    let pf=null;if(!tg){let pd=1e9;for(const fd of G.food){if(fd.type!=='pellet'||fd.y<bottom-6||claimed.has(fd))continue;const d=Math.abs(fd.x-k.x);if(d<pd){pd=d;pf=fd}}if(pf)claimed.add(pf)}
+    const gx=tg?tg.x:pf?pf.x:k.wx,sp=(tg||pf)?35+60*kg:12+12*kg,dx=gx-k.x;
+    if(!tg&&!pf&&Math.abs(dx)<3){k.wx=24+rand()*(W-48);k.snuff=.9}
+    k.moving=Math.abs(dx)>2;k.x+=Math.sign(dx)*Math.min(Math.abs(dx),sp*dt);
+    for(const o of G.cory){const gap=Math.abs(o.x-k.x);if(o!==k&&gap<40){k.x+=(k.x<o.x?-1:k.x>o.x?1:rand()-.5)*(140-gap*2.5)*dt;if(!tg)k.wx=k.x+(k.x<o.x?-60:60)}}
+    k.x=clamp(k.x,20,W-20);
+    if(Math.abs(dx)>1)k.dir=dx>0?1:-1;k.face+=(k.dir-k.face)*Math.min(1,dt*10);
+    if(tg){const w=26+22*k.g,mx=k.x+k.face*w*.4,my=H-SAND+18;
+      if(tg.y>=bottom&&Math.abs(tg.x-mx)<14+w*.2){tg.sk=(tg.sk||0)+dt*3.5;const a=Math.min(1,dt*12);tg.x+=(mx-tg.x)*a;tg.y+=(my-tg.y)*a;k.snuff=.25;
+        if(tg.sk>=1){collect(tg,true);sparkle(mx,my,'#ffe9a8',4)}}}
+    if(pf){const w=26+22*k.g,mx=k.x+k.face*w*.4;if(Math.abs(pf.x-mx)<12+w*.2){G.food.splice(G.food.indexOf(pf),1);k.snuff=.4;sparkle(pf.x,pf.y,'#c98a4e',4)}}
+  }
+  for(let i=G.coins.length-1;i>=0;i--){const c=G.coins[i];
+    if(c.sk){if((c.skT=(c.skT||0)+dt)>1.5)G.coins.splice(i,1);continue}
+    if(c.y<bottom+6){c.y+=(c.kind==='gem'?55:38)*dt;c.x=clamp(c.x+c.vx*dt,12,W-12);c.vx*=.98}else if((c.rest+=dt)>1)G.coins.splice(i,1)}
+  for(let i=G.fx.length-1;i>=0;i--){const p=G.fx[i];p.x+=p.vx*dt;p.y+=p.vy*dt;p.vx*=.92;p.vy*=.92;if((p.life-=dt)<=0)G.fx.splice(i,1)}
+  for(let i=G.trail.length-1;i>=0;i--)if((G.trail[i].life-=dt)<=0)G.trail.splice(i,1);
+  for(let i=G.txt.length-1;i>=0;i--){const p=G.txt[i];p.y-=34*dt;if((p.life-=dt*.9)<=0)G.txt.splice(i,1)}
+  if(G.banner&&(G.banner.life-=dt)<=0)G.banner=null;
+  if(t>=G.dur)endGame(false);
+  else if(!G.fish.some(f=>!f.dead))endGame(true);
+}
+
+// ---------- rendering ----------
+function textOut(s,x,y,size,col,align='center',lw=4){ctx.font='900 '+size+'px "Noto Sans KR", sans-serif';ctx.textAlign=align;ctx.lineJoin='round';ctx.strokeStyle=INK;ctx.lineWidth=lw;ctx.strokeText(s,x,y);ctx.fillStyle=col;ctx.fillText(s,x,y)}
+const coinImg=(kind,t)=>kind==='gem'?IMG.gem:IMG[kind+(Math.floor(t*9)%7)];
+// ---------- water light: a tileable caustic net drifting over the painting, plus slow passing shadows ----------
+let caustic=null;const wl=document.createElement('canvas'),wlx=wl.getContext('2d');
+function buildCaustic(){
+  // Worley F2-F1 edges on a wrapping 256px tile give the bright web of focused sunlight
+  const N=256,c=document.createElement('canvas');c.width=c.height=N;const x=c.getContext('2d'),im=x.createImageData(N,N),d=im.data;
+  const pts=Array.from({length:14},()=>[Math.random()*N,Math.random()*N]);
+  const T=Math.PI*2/N;
+  for(let y=0;y<N;y++)for(let X=0;X<N;X++){let f1=1e9,f2=1e9;
+    // warp the sample point with whole-period sines so cell edges curve like real caustics and the tile still wraps
+    const sx=X+7*Math.sin(y*T*2)+4*Math.sin(y*T*5),sy=y+7*Math.sin(X*T*3)+4*Math.sin(X*T*4);
+    for(const [px,py] of pts)for(let oy=-N;oy<=N;oy+=N)for(let ox=-N;ox<=N;ox+=N){const dx=sx-px-ox,dy=sy-py-oy,dd=dx*dx+dy*dy;if(dd<f1){f2=f1;f1=dd}else if(dd<f2)f2=dd}
+    const v=Math.max(0,1-(Math.sqrt(f2)-Math.sqrt(f1))/8),i=(y*N+X)*4;d[i]=215;d[i+1]=255;d[i+2]=225;d[i+3]=Math.round(v*v*255)}
+  x.putImageData(im,0,0);
+  const s=document.createElement('canvas');s.width=s.height=N;const sx2=s.getContext('2d');try{sx2.filter='blur(1.2px)'}catch(e){}sx2.drawImage(c,0,0);caustic=s;
+}
+function drawWaterLight(t){
+  if(!caustic)return;
+  // light layer is drawn at half the logical size: soft is fine for light, and it keeps the cost low
+  const lw=W>>1,lh=Math.ceil(H/2);if(wl.width!==lw||wl.height!==lh){wl.width=lw;wl.height=lh}
+  wlx.globalCompositeOperation='source-over';wlx.clearRect(0,0,lw,lh);
+  const pat=wlx.createPattern(caustic,'repeat');
+  for(const [s,vx,vy,a] of [[.32,7,3,.9],[.45,-5,6,.6]]){pat.setTransform(new DOMMatrix().translateSelf(t*vx,t*vy).scaleSelf(s));wlx.globalAlpha=a;wlx.fillStyle=pat;wlx.fillRect(0,0,lw,lh)}
+  // strongest near the surface, dimmer mid-water, a little brighter again where it lands on the sand
+  wlx.globalAlpha=1;wlx.globalCompositeOperation='destination-in';
+  const g=wlx.createLinearGradient(0,0,0,lh);g.addColorStop(0,'rgba(0,0,0,1)');g.addColorStop(.55,'rgba(0,0,0,.25)');g.addColorStop(.85,'rgba(0,0,0,.45)');g.addColorStop(1,'rgba(0,0,0,.2)');
+  wlx.fillStyle=g;wlx.fillRect(0,0,lw,lh);
+  const th=THEMES[curTheme]||THEMES[0];
+  ctx.save();ctx.globalCompositeOperation='lighter';ctx.globalAlpha=(.16+.04*Math.sin(t*.7))*(th.light??1);ctx.drawImage(wl,0,0,W,H);ctx.restore();
+  if(th.mult){ctx.save();ctx.globalCompositeOperation='multiply';ctx.fillStyle=th.mult;ctx.fillRect(0,0,W,H);ctx.restore()}
+  if(th.shade){ctx.fillStyle=th.shade;ctx.fillRect(0,0,W,H)}
+  if(th.pulse){const p=.5+.5*Math.sin(t*.9),vg=ctx.createRadialGradient(W/2,H*.45,Math.min(W,H)*.25,W/2,H*.45,Math.max(W,H)*.75);
+    vg.addColorStop(0,'rgba(60,0,0,0)');vg.addColorStop(1,'rgba(30,0,0,'+(.55+.2*p).toFixed(3)+')');ctx.fillStyle=vg;ctx.fillRect(0,0,W,H)}
+  // big soft shadows drift across, so parts of the tank dim and brighten in turn
+  for(let i=0;i<3;i++){const cx=W*(.5+.7*Math.sin(t*.045+i*2.1)),cy=H*(.4+.3*Math.sin(t*.06+i*1.7)),r=W*.6,sg=ctx.createRadialGradient(cx,cy,0,cx,cy,r);
+    sg.addColorStop(0,'rgba(0,14,12,.30)');sg.addColorStop(1,'rgba(0,14,12,0)');ctx.fillStyle=sg;ctx.fillRect(0,0,W,H)}
+  // dirty water clouds the whole tank
+  if(G&&G.water<60){ctx.fillStyle='rgba(78,84,34,'+(((60-G.water)/60)*.5).toFixed(3)+')';ctx.fillRect(0,0,W,H)}
+}
+function render(t,dt){
+  ctx.setTransform(1,0,0,1,0,0);ctx.drawImage(bgc,0,0);
+  ctx.setTransform(SC,0,0,SC,0,0);ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='low';
+  // murky water clouds the tank; an air-stone bubble column is the only ambient motion left
+  if(G&&G.water<60){ctx.fillStyle='rgba(78,84,34,'+(((60-G.water)/60)*.5).toFixed(3)+')';ctx.fillRect(0,0,W,H)}
+ctx.strokeStyle='rgba(255,255,255,.7)';ctx.lineWidth=1.2;
+  for(const b of deco.bubbles){b.y-=b.v*dt;if(b.y<-8)b.y=H-SAND;ctx.beginPath();ctx.arc(W*.86+Math.sin(t*3+b.ph)*4+(b.ph-3)*2,b.y,b.r,0,7);ctx.stroke()}
+  if(!G)return;
+  const sh=G.shake>0?G.shake*10:0;
+  ctx.save();if(sh)ctx.translate((Math.random()-.5)*sh,(Math.random()-.5)*sh);
+  for(const k of G.cory)fish(IMG.cory,k.x,H-SAND+16+(k.snuff>0?Math.sin(t*30):0),26+22*k.g,k.face,(t+k.ph)*(k.moving?12:4),k.moving?.12:.04,.3);
+  for(const f of G.food){
+    if(f.type==='shrimp'){const st=f.age<1.6?Math.floor(f.age/.32):5+Math.floor((t+f.ph)*6)%3;const im=IMG['shrimp'+st];if(im)sprite(im,f.x,f.y,im.width*.42,f.vx<0?-1:1)}
+    else{ctx.fillStyle='#8a4f22';ctx.beginPath();ctx.arc(f.x,f.y,3.6,0,7);ctx.fill();ctx.fillStyle='#d99a5e';ctx.fillRect(f.x-1.8,f.y-1.8,1.6,1.6)}}
+  for(const f of G.fish){
+    const pop=1+f.pop*.2*Math.sin(f.pop*12),spd=f.dead?0:(G.frenzy?16:f.stage?8:12);
+    ctx.save();if(f.dead)ctx.globalAlpha=Math.max(0,1-f.dead/2);
+    fish(guppyImg(f),f.x,f.y,GW[f.stage]*pop*(f.kind==='gray'?.92:1),f.face,(t+f.ph)*spd,f.dead?0:.1,f.kind==='gray'?.4:.5,!!f.dead);
+    // gray guppies glint once every 5 s (each on its own beat) so they are easy to spot
+    if(f.kind==='gray'&&!f.dead){const q=(t+f.ph*.83)%5;if(q<.45){const k=1-Math.abs(q-.225)/.225,gw=GW[f.stage]*.92;
+      ctx.globalCompositeOperation='lighter';ctx.globalAlpha=k*.85;fish(guppyImg(f),f.x,f.y,gw,f.face,(t+f.ph)*spd,.1,.4);ctx.globalCompositeOperation='source-over';ctx.globalAlpha=1;
+      const sx=f.x+f.face*gw*.22,sy=f.y-fishR(f)*.6,r=4+k*7;ctx.strokeStyle='rgba(255,255,255,'+k.toFixed(2)+')';ctx.lineWidth=2;ctx.lineCap='round';
+      ctx.beginPath();ctx.moveTo(sx-r,sy);ctx.lineTo(sx+r,sy);ctx.moveTo(sx,sy-r);ctx.lineTo(sx,sy+r);ctx.stroke()}}
+    ctx.restore();
+    if(!f.dead&&f.hunger>.6&&(f.hunger<.85||Math.floor(t*7)%2)){const bx=f.x+6,by=f.y-fishR(f)-10;ctx.fillStyle='rgba(255,255,255,.92)';ctx.strokeStyle=INK;ctx.lineWidth=1.2;
+      ctx.beginPath();ctx.arc(bx,by,6,0,7);ctx.fill();ctx.stroke();ctx.beginPath();ctx.arc(bx-5,by+7,1.6,0,7);ctx.fill();ctx.fillStyle='#8a4f22';ctx.beginPath();ctx.arc(bx,by,2.6,0,7);ctx.fill()}
+  }
+  for(const c of G.coins){if(!c.sk&&c.rest>.5&&Math.floor(t*10)%2)continue;spriteH(coinImg(c.kind,t+c.ph),c.x,c.y,(c.kind==='silver'?17:20)*(1-(c.sk||0)*.75))}
+  for(const m of G.mobs){const M=m.M,y=m.y+Math.sin(m.t*2.5)*3;
+    // convict's territory: a slowly turning dashed ring
+    if(M.b==='territory'&&!m.fleeing){ctx.save();ctx.setLineDash([6,8]);ctx.lineDashOffset=-m.t*20;ctx.strokeStyle='rgba(255,150,130,.5)';ctx.lineWidth=2;ctx.beginPath();ctx.arc(m.hx,m.hy,110,0,7);ctx.stroke();ctx.restore()}
+    // snout: a gentle mouthing at rest, a fast quiver while rearing back, a big snap on the bite
+    const img=IMG[M.img],hgt=img?M.w*img.height/img.width:M.w*.6,HEAD=.2;
+    const hamp=m.chomp>0?.09*Math.sin((1-m.chomp/.4)*Math.PI):m.wind>0?.05:m.lunge>0?.04:.015,hph=m.t*(m.wind>0?28:m.chomp>0?20:6);
+    // piranha frenzy: flames licking up all around its body
+    const burning=M.b==='frenzy'&&m.frenzy>0&&!m.fleeing,fdt=paused?0:dt;m.fl=m.fl||[];
+    if(burning)for(let i=0,n=(m.frenzy*16)*fdt+(rand()<((m.frenzy*16)*fdt)%1?1:0);i<n;i++){const a=rand()*Math.PI*2;
+      m.fl.push({ox:Math.cos(a)*M.w*.38,oy:Math.sin(a)*hgt*.3-hgt*.04,vx:(rand()-.5)*10,vy:-50-rand()*50,ph:rand()*7,life:.35+rand()*.3,max:.65,r:3+rand()*3+m.frenzy})}
+    for(let i=m.fl.length-1;i>=0;i--){const f=m.fl[i];f.ox+=f.vx*fdt;f.oy+=f.vy*fdt;if((f.life-=fdt)<=0)m.fl.splice(i,1)}
+    if(m.fl.length){ctx.save();ctx.globalCompositeOperation='lighter';
+      for(const f of m.fl){const k=f.life/f.max,r=f.r*(.4+k*.6),fx=m.x+f.ox+Math.sin(m.t*18+f.ph)*1.5,fy=y+f.oy;
+        for(const [c,sc,al] of [['#d8300c',1,.55],['#ff8a1c',.7,.7],['#ffe27a',.38,.9]]){const R=r*sc;
+          ctx.globalAlpha=Math.min(1,k*1.6)*al;ctx.fillStyle=c;ctx.beginPath();ctx.moveTo(fx,fy-R*2.6);
+          ctx.bezierCurveTo(fx+R*.9,fy-R*1.2,fx+R*1.1,fy+R*.2,fx,fy+R);ctx.bezierCurveTo(fx-R*1.1,fy+R*.2,fx-R*.9,fy-R*1.2,fx,fy-R*2.6);ctx.fill()}}
+      ctx.restore()}
+    ctx.save();
+    const st=0,hk=(m.hfx||0)/.28,jx=hk>0?Math.sin(hk*28)*6*hk:0,mph=m.t*(M.b==='frenzy'?8:M.b==='gulp'?3:4)*(m.lunge>0?2.5:1)*(m.full>0?.4:1);
+    fish(img,m.x+jx,y,M.w,m.face,mph,m.lunge>0?.12:.06,M.split,false,HEAD,hph,hamp);
+    if(hk>.35){ctx.save();ctx.globalCompositeOperation='lighter';ctx.globalAlpha=Math.min(1,(hk-.35)*2.4);fish(img,m.x+jx,y,M.w,m.face,mph,.06,M.split,false,HEAD,hph,hamp);fish(img,m.x+jx,y,M.w,m.face,mph,.06,M.split,false,HEAD,hph,hamp);ctx.restore()}
+    // piranha frenzy: the eyes glow red
+    if(burning&&M.eye){const u=(M.eye[0]-(1-HEAD))/HEAD,ex=m.x+m.face*(M.eye[0]-.5)*M.w,ey=y+(M.eye[1]-.5)*hgt+headOff(u,hph,hamp,hgt),pulse=.75+.25*Math.sin(m.t*12);
+      ctx.save();ctx.globalCompositeOperation='lighter';const g=ctx.createRadialGradient(ex,ey,0,ex,ey,11);g.addColorStop(0,'rgba(255,60,30,'+(.9*pulse)+')');g.addColorStop(1,'rgba(255,0,0,0)');
+      ctx.fillStyle=g;ctx.beginPath();ctx.arc(ex,ey,11,0,7);ctx.fill();ctx.restore();
+      ctx.fillStyle='#ff2a14';ctx.beginPath();ctx.arc(ex,ey,3.4,0,7);ctx.fill();ctx.fillStyle='#ffe0c0';ctx.beginPath();ctx.arc(ex+m.face*.8,ey-.8,1,0,7);ctx.fill()}
+    if(m.wind>0||m.lunge>0||m.chomp>0){
+      // jaws: two white fang arcs at the mouth — open while winding/darting, snap shut on the bite
+      const mx=m.x+m.face*M.w*(.42+st*.5),R=M.r*.55,open=m.chomp>0?Math.max(0,(m.chomp-.25)/.15)*.9:m.lunge>0?.9:.55;
+      ctx.save();ctx.translate(mx,y);ctx.scale(m.face,1);ctx.lineCap='round';ctx.strokeStyle=INK;ctx.lineWidth=5;
+      for(const sg of[-1,1]){ctx.beginPath();ctx.arc(-R*.2,0,R,sg*(.15+open*.9)-.35,sg*(.15+open*.9)+.35);ctx.stroke()}
+      ctx.strokeStyle='#fff';ctx.lineWidth=2.5;
+      for(const sg of[-1,1]){ctx.beginPath();ctx.arc(-R*.2,0,R,sg*(.15+open*.9)-.35,sg*(.15+open*.9)+.35);ctx.stroke()}
+      ctx.restore();
+      if(m.wind>0)textOut('!',mx,y-M.r-4,22,'#ffd75a','center',4)}
+    ctx.restore();
+    if(m.full>0&&!m.fleeing){const zz=(m.t*1.2)%1;ctx.globalAlpha=1-zz;textOut('Z',m.x+m.face*M.w*.25+zz*10,y-M.r-6-zz*22,14+zz*6,'#e8f4ff','center',3);ctx.globalAlpha=1}
+    if(!m.fleeing&&!M.boss){const p=1-m.scare/m.max,y0=y-M.r-22;ctx.fillStyle=INK;ctx.fillRect(m.x-27,y0,54,8);ctx.fillStyle=p>.35?'#ffb04a':'#ff6b5b';ctx.fillRect(m.x-25,y0+2,50*p,4)}}
+  ctx.restore();
+  // scooped guppies: into the net for a beat, then up and out, fading away
+  const cdt=paused?0:dt;
+  if(G.caught)for(let i=G.caught.length-1;i>=0;i--){const c=G.caught[i],f=c.f;c.t+=cdt;if(c.t>.85){G.caught.splice(i,1);continue}
+    const h=G.netHead,a=Math.min(1,c.t/.12);if(c.t<.12&&h){c.nx=h.x;c.ny=h.y}
+    const up=Math.max(0,c.t-.12)/.73,x=a<1?c.sx+(c.nx-c.sx)*a:c.nx,yy=(a<1?c.sy+(c.ny-c.sy)*a:c.ny)-up*up*150;
+    ctx.globalAlpha=1-up;fish(guppyImg(f),x,yy,GW[f.stage]*(f.kind==='gray'?.92:1),f.face,(t+f.ph)*18,.18,f.kind==='gray'?.4:.5);
+    if(up>0&&rand()<cdt*30)G.fx.push({x:x+(rand()-.5)*14,y:yy+6,vx:0,vy:-20,life:.4,col:'rgba(230,248,255,.9)',r:1.6});
+    ctx.globalAlpha=1}
+  if(G.rings)for(let i=G.rings.length-1;i>=0;i--){const r=G.rings[i];if((r.life-=cdt)<=0){G.rings.splice(i,1);continue}const k=1-r.life/.3;
+    ctx.globalAlpha=1-k;ctx.strokeStyle='#fff';ctx.lineWidth=4*(1-k)+1;ctx.beginPath();ctx.arc(r.x,r.y,12+k*34,0,7);ctx.stroke();ctx.globalAlpha=1}
+  // net wake + net
+  ctx.strokeStyle='rgba(255,255,255,.7)';ctx.lineCap='round';
+  for(let i=1;i<G.trail.length;i++){const p=G.trail[i-1],q=G.trail[i];if(p.sid!==q.sid)continue;const k=clamp(q.life/.3,0,1);
+    ctx.lineWidth=2+k*12;ctx.globalAlpha=k*.55;ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(q.x,q.y);ctx.stroke()}
+  ctx.globalAlpha=1;
+  if(G.netHead&&IMG.net){const h=G.netHead;sprite(IMG.net,h.x-Math.cos(h.ang)*12,h.y-Math.sin(h.ang)*12,96,1,h.ang+Math.PI*.25)}
+  for(const p of G.fx){ctx.globalAlpha=clamp(p.life*2,0,1);ctx.fillStyle=p.col;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,7);ctx.fill()}
+  ctx.globalAlpha=1;
+  for(const p of G.txt){ctx.globalAlpha=clamp(p.life*1.5,0,1);textOut(p.s,p.x,p.y,p.size,p.col)}
+  ctx.globalAlpha=1;
+  // tank census: the run's goal at a glance
+  const n=tank(),x0=W-160;
+  ctx.fillStyle='rgba(36,22,12,.75)';ctx.strokeStyle='#b9824f';ctx.lineWidth=2;ctx.beginPath();ctx.roundRect?ctx.roundRect(x0,8,152,32,8):ctx.rect(x0,8,152,32);ctx.fill();ctx.stroke();
+  const ic=(img,x,w,label)=>{sprite(img,x,24,w);textOut(String(label),x+w/2+4,31,17,'#f7e9cc','left',3)};
+  ic(IMG[STRAINS[Math.floor(t/1.5)%STRAINS.length].img],x0+18,26,n.color);ic(IMG.cory,x0+68,26,n.cory);ic(IMG.guppy_gray,x0+118,24,n.gray);
+  if(G.combo>=2){
+    const mlt=(1+Math.min(G.combo-1,20)*.1).toFixed(1);
+    textOut(G.combo+' 콤보',14,36,28,'#ffd75a','left',5);textOut('점수 x'+mlt,14,56,16,'#fff','left',4);
+    ctx.fillStyle=INK;ctx.fillRect(14,62,84,8);ctx.fillStyle='#ffd75a';ctx.fillRect(16,64,80*clamp(G.comboT/1.6,0,1),4);
+  }
+  {const m=G.mobs.find(m=>m.M.boss&&!m.fleeing);
+  if(m){const p=1-m.scare/m.max,y0=60;
+    textOut(m.M.name+(m.frenzy?' · 광폭화 x'+m.frenzy:''),W/2,y0,17,m.frenzy?'#ff8a7a':'#ffd75a','center',4);
+    ctx.fillStyle=INK;ctx.fillRect(W/2-110,y0+6,220,14);ctx.fillStyle='#4a1414';ctx.fillRect(W/2-107,y0+9,214,8);ctx.fillStyle=p>.35?'#ff5a3a':'#ff2a2a';ctx.fillRect(W/2-107,y0+9,214*p,8);ctx.fillStyle='rgba(255,255,255,.35)';ctx.fillRect(W/2-107,y0+9,214*p,2)}}
+  if(G.frenzy){ctx.globalAlpha=.6+.4*Math.sin(t*12);textOut('흥분! 속도 x1.5',W/2,H-SAND-18,16,'#ffc6a8');ctx.globalAlpha=1}
+  if(G.banner){const b=G.banner,sc=1+Math.max(0,b.life-1.5)*2;ctx.save();ctx.globalAlpha=clamp(b.life*2,0,1);ctx.translate(W/2,H*.3);ctx.scale(sc,sc);ctx.translate(-W/2,-H*.3);textOut(b.s,W/2,H*.3,27,b.col,'center',7);ctx.restore()}
+}
+
+// ---------- HUD & shop ----------
+const SHOP=[
+  {id:'guppy',nm:'컬러 구피',img:'guppy_red',price:()=>COST.guppy,can:()=>tank().color+tank().gray<CAP,buy:()=>addGuppy(1,null,null,'color')},
+  {id:'cory',nm:'코리도라스',img:'cory',price:()=>COST.cory,can:()=>G.cory.length<10,buy:()=>{G.cory.push({x:30+rand()*(W-60),wx:rand()*W,dir:1,face:1,snuff:0,moving:false,ph:rand()*6,age:0,g:0});checkTank()}},
+  {id:'shrimp',nm:'브라인쉬림프',img:'shrimp6',price:()=>COST.shrimp,can:()=>true,ready:()=>G.shrimpCd<=0,buy:()=>{G.shrimpCd=SHRIMP_CD;pourShrimp()}},
+  {id:'water',nm:'물갈이',img:'bucket',price:()=>100,can:()=>true,buy:()=>{G.water=100;banner('물갈이 완료! 물이 맑아졌어요','#bff3ff');for(let i=0;i<4;i++)sparkle(80+i*80,H*.4,'#dff8ff',6)}},
+  {id:'sell',nm:'10마리 분양',img:'guppy_gold',reward:true,price:()=>0,can:()=>adults()>=10&&tank().color+tank().gray>10,buy:sellTen},
+];
+const SHRIMP_CD=1,SELL_PTS=1500;
+const adults=()=>G.fish.reduce((n,f)=>n+(!f.dead&&f.kind==='color'&&f.stage===2),0);
+// sell ten colourful adults (newest first) for score, freeing room under the tank cap
+function sellTen(){
+  let n=0;for(let i=G.fish.length-1;i>=0&&n<10;i--){const f=G.fish[i];if(!f.dead&&f.kind==='color'&&f.stage===2){G.fish.splice(i,1);sparkle(f.x,f.y,'#ffd75a',4);n++}}
+  G.score+=SELL_PTS;G.sold+=n;S.sold+=n;unlock('sell');if(S.sold>=100)unlock('sell100');
+  banner('10마리 분양 완료! +'+fmt(SELL_PTS),'#ffd75a');beep(523,.1,'triangle',.06);setTimeout(()=>beep(784,.15,'triangle',.06),100);buzz(30);
+}
+function buildShop(){
+  const el=$('shop');el.innerHTML='';for(const it of SHOP)it.els=null;
+  for(const it of SHOP){
+    const b=document.createElement('button');b.className='sbtn wood';b.id='shop-'+it.id;
+    b.innerHTML='<img src="assets/'+it.img+'.png" alt=""><span class="nm">'+it.nm+'</span><span class="pr"></span><span class="cd"></span>';
+    b.addEventListener('click',()=>{
+      if(!G||paused||G.over)return;const p=it.price();
+      if(!it.can()||(it.ready&&!it.ready()))return;
+      if(G.money<p){beep(150,.1,'square',.03);buzz(20);return}
+      G.money-=p;it.buy();beep(880,.08,'triangle',.05,1.2);
+    });
+    el.append(b);
+  }
+}
+const setT=(el,v)=>{if(el._t!==v){el._t=v;el.textContent=v}};
+const setH=(el,v)=>{if(el._h!==v){el._h=v;el.innerHTML=v}};
+const setS=(el,p,v)=>{if(el['_'+p]!==v){el['_'+p]=v;el.style[p]=v}};
+const setC=(el,c,on)=>{on=!!on;if(el.classList.contains(c)!==on)el.classList.toggle(c,on)};
+function syncHud(){
+  if(!G)return;
+  setT($('money'),fmt(G.money));setT($('score'),fmt(G.score));
+  const tf=$('timefill'),sec=Math.floor(G.endless?G.t:Math.max(0,G.dur-G.t)),mmss=Math.floor(sec/60)+':'+String(sec%60).padStart(2,'0');
+  setS(tf,'width',(G.endless?100:Math.round(Math.max(0,1-G.t/G.dur)*200)/2)+'%');setC(tf,'low',!G.endless&&G.dur-G.t<20);setC(tf,'endless',G.endless);
+  setT($('timeTxt'),G.endless?'∞ '+mmss:mmss);
+  for(const it of SHOP){const b=$('shop-'+it.id);if(!b)continue;const can=it.can(),rdy=!it.ready||it.ready();
+    it.els=it.els||{pr:b.querySelector('.pr'),nm:b.querySelector('.nm'),cd:b.querySelector('.cd')};
+    setC(b,'max',!can);
+    setH(it.els.pr,it.reward?(can?'<img src="assets/star.png" alt="">+'+fmt(SELL_PTS):'성어 '+adults()+'/10'):!can?'MAX':rdy?'<img src="assets/gold0.png" alt="">'+fmt(it.price()):G.shrimpCd.toFixed(1)+'초');
+    if(it.id==='water'){setT(it.els.nm,'물갈이 '+Math.round(G.water)+'%');setC(b,'warn',G.water<30)}
+    setS(it.els.cd,'height',(rdy?0:Math.round(G.shrimpCd/SHRIMP_CD*100))+'%');
+    setC(b,'off',!can||!rdy||G.money<it.price())}
+}
+
+// ---------- flow ----------
+const STARS=[8000,18000,32000],STARS_HARD=[6000,14000,25000];   // 3-minute modes only
+const starsFor=()=>G.mode==='amazon'?STARS_HARD:STARS;
+// modes open in order: ★★ in 클리어워터 opens 블랙워터, ★★ in 블랙워터 opens 무한 (judged from best scores)
+const starsOf=(mode,sc)=>(mode==='amazon'?STARS_HARD:STARS).filter(s=>sc>=s).length;
+const LOCKS={amazon:{need:()=>starsOf('lake',S.best)>=2,msg:'클리어워터에서 '+fmt(STARS[1])+'점(★★)을 넘기면 열려요'},
+  endless:{need:()=>starsOf('amazon',S.bestHard)>=2,msg:'블랙워터에서 '+fmt(STARS_HARD[1])+'점(★★)을 넘기면 열려요'}};
+const isOpen=mode=>!LOCKS[mode]||LOCKS[mode].need();
+const starRow=n=>'<i>'+'★'.repeat(n)+'</i>'+'☆'.repeat(3-n);
+let lockT=0;
+function tryStart(mode,btn){
+  if(isOpen(mode)){if(S.fresh[mode]){delete S.fresh[mode];save()}start(mode);return}
+  btn.classList.remove('nope');void btn.offsetWidth;btn.classList.add('nope');beep(150,.12,'square',.03);buzz(30);
+  const m=$('lockMsg');m.textContent=LOCKS[mode].msg;m.hidden=false;clearTimeout(lockT);lockT=setTimeout(()=>m.hidden=true,2200);
+}
+const mmssOf=s=>Math.floor(s/60)+'분 '+String(Math.floor(s%60)).padStart(2,'0')+'초';
+function show(id){tutOpen=id==='tutScr';for(const s of ['menu','pause','result','troScr','recScr','tutScr','dexScr'])$(s).hidden=s!==id;scrollHints()}
+// every scrolling panel gets a "더 보기" pill while there is content below the fold; tapping it scrolls down
+function moreUpd(el){const more=el.offsetParent!==null&&el.scrollHeight-el.scrollTop-el.clientHeight>6,a=el._more;el.classList.toggle('more',more);
+  if(a){a.hidden=!more;if(more)a.style.top=(el.offsetTop+el.clientHeight-34)+'px'}}
+function scrollHints(){const els=document.querySelectorAll('.card>.in');requestAnimationFrame(()=>els.forEach(moreUpd));setTimeout(()=>els.forEach(moreUpd),350)}
+document.querySelectorAll('.card>.in').forEach(el=>{const a=document.createElement('div');a.className='morehint';a.textContent='▼ 더 보기';a.hidden=true;
+  el.parentElement.appendChild(a);el._more=a;el.addEventListener('scroll',()=>moreUpd(el),{passive:true});a.onclick=()=>el.scrollBy({top:el.clientHeight*.7,behavior:'smooth'})});
+window.addEventListener('resize',scrollHints);
+function showMenu(){
+  paused=true;show('menu');$('app').classList.add('menu');curTheme=0;resize();
+  $('bestLake').textContent=fmt(S.best);$('bestHard').textContent=fmt(S.bestHard);$('bestEndless').textContent=fmt(S.bestEndless);
+  $('stLake').innerHTML=starRow(starsOf('lake',S.best));$('stHard').innerHTML=starRow(starsOf('amazon',S.bestHard));
+  $('hardBtn').classList.toggle('locked',!isOpen('amazon'));$('endlessBtn').classList.toggle('locked',!isOpen('endless'));
+  $('hardBtn').classList.toggle('fresh',!!S.fresh.amazon);$('endlessBtn').classList.toggle('fresh',!!S.fresh.endless);
+}
+function start(mode){$('app').classList.remove('menu');resize();newGame(mode);$('quitBtn').textContent=G.endless?'그만하고 결과 보기':'그만하고 메뉴로';if(!S.tut2){syncHud();openTut(true);return}show(null);paused=false;last=performance.now();syncHud();beep(523,.1,'triangle',.05);setTimeout(()=>beep(784,.15,'triangle',.05),90)}
+function endGame(wiped){
+  if(G.over)return;G.over=true;paused=true;G.swipe=null;G.netHead=null;
+  const ad=adults(),bonus=ad*100+G.cory.length*150;G.score+=bonus;
+  const sc=Math.round(G.score),endless=G.endless,stars=endless?0:starsFor().filter(s=>sc>=s).length;
+  const wasOpen={amazon:isOpen('amazon'),endless:isOpen('endless')};
+  if(!wiped&&G.eaten===0)unlock('safe');
+  if(stars===3)unlock('star3');
+  let nb=false;
+  if(endless){if(sc>S.bestEndless){nb=S.bestEndless>0;S.bestEndless=sc}}
+  else if(G.mode==='amazon'){if(sc>S.bestHard){nb=S.bestHard>0;S.bestHard=sc}}
+  else if(sc>S.best){nb=S.best>0;S.best=sc}
+  S.maxCombo=Math.max(S.maxCombo,G.maxCombo);
+  const opened=Object.keys(wasOpen).filter(k=>!wasOpen[k]&&isOpen(k));for(const k of opened)S.fresh[k]=true;
+  S.records.push({s:sc,st:stars,d:today(),m:endless?'무한 '+mmssOf(G.t):G.mode==='amazon'?'블랙워터':'클리어워터'});S.records.sort((a,b)=>b.s-a.s);S.records=S.records.slice(0,10);
+  save();
+  $('resTitle').textContent=wiped?'구피가 모두 사라졌어요':endless?'무한 모드 종료':MODES[G.mode].name+' 종료!';
+  $('resScore').textContent='0';$('resBest').hidden=!nb;$('resStars').hidden=endless;
+  $('resBonus').innerHTML='수조 보너스 <b>+'+fmt(bonus)+'</b><br>컬러 구피 성어 '+ad+'마리 × 100 · 코리도라스 '+G.cory.length+'마리 × 150'
+    +(G.sold?'<br>분양한 구피 '+G.sold+'마리':'')+(G.penalty?'<br>감점 -'+fmt(G.penalty)+' (컬러 구피 '+G.lostColor+'마리 같이 건짐)':'');
+  $('rsCombo').textContent=G.maxCombo;$('rsChase').textContent=G.chased;$('rsNet').textContent=G.netted;
+  $('resTro').innerHTML=opened.map(k=>'<span class="chip unlock">새 전장 열림 · '+MODES[k].name+'</span>').join('')
+    +G.newTro.map(t=>'<span class="chip"><img src="'+cupSrc(t.t)+'" alt="">'+t.n+'</span>').join('');
+  if(opened.length)setTimeout(()=>{beep(523,.12,'triangle',.06);setTimeout(()=>beep(659,.12,'triangle',.06),110);setTimeout(()=>beep(1047,.25,'triangle',.06),220)},1700);
+  const nextStar=starsFor().find(s=>sc<s);
+  $('resNext').textContent=endless?'버틴 시간 '+mmssOf(G.t):nextStar?'다음 별까지 '+fmt(nextStar-sc)+'점':'완벽해요! 이제 기록을 깨 보세요.';
+  const spans=[...$('resStars').children];spans.forEach(s=>s.classList.remove('on'));
+  show('result');
+  const t0=performance.now();(function count(){const k=Math.min(1,(performance.now()-t0)/900);$('resScore').textContent=fmt(sc*(1-Math.pow(1-k,3)));if(k<1)requestAnimationFrame(count)})();
+  spans.forEach((s,i)=>{if(i<stars)setTimeout(()=>{s.classList.add('on');beep(660+i*220,.15,'triangle',.06);buzz(20)},700+i*300)});
+  $('shareBtn').dataset.txt='🐟 구피 키우기 '+(endless?'블랙워터 무한 '+mmssOf(G.t)+' 생존, ':MODES[G.mode].name+' 3분 ')+fmt(sc)+'점!'+(endless?'':' '+'★'.repeat(stars)+'☆'.repeat(3-stars))+' 컬러 구피 '+tank().color+'마리 · 최대 콤보 '+G.maxCombo+'. 이길 수 있어?';
+  $('shareBtn').textContent='점수 복사';
+}
+function showTrophies(){
+  const g=$('troGrid');g.innerHTML='';let n=0;
+  for(const t of TROPHIES){const got=!!S.tro[t.id];if(got)n++;
+    const d=document.createElement('div');d.className='tro'+(got?'':' lock');
+    d.innerHTML='<img src="'+cupSrc(t.t)+'" alt=""><div class="tn">'+t.n+'</div><div class="td">'+t.d+'</div>';
+    if(!got&&t.p){const [v,m]=t.p();d.insertAdjacentHTML('beforeend','<div class="prog"><i style="width:'+Math.min(100,v/m*100)+'%"></i></div>')}
+    g.append(d)}
+  $('troCount').textContent=n+' / '+TROPHIES.length;show('troScr');
+}
+function showRecords(){
+  $('recList').innerHTML=S.records.length?S.records.map((r,i)=>'<div class="rec"><span class="rk">'+(i+1)+'</span><span class="sc">'+fmt(r.s)+'</span><span class="st">'+'★'.repeat(r.st)+'</span><span class="dt">'+(r.m==='호수'?'클리어워터':r.m)+' · '+r.d.slice(5)+'</span></div>').join('')
+    :'<p class="hint">아직 기록이 없어요. 첫 러시를 시작해 보세요!</p>';
+  armReset(false);show('recScr');
+}
+// two taps to wipe: the first arms the button, the second clears everything but the theme and tutorial setting.
+// Stats and play days go with the trophies, or the next coin/chase would re-unlock them at once.
+let resetT=0;
+function armReset(on){const b=$('recReset');clearTimeout(resetT);
+  b.textContent=on?'정말 지울까요?':'기록 초기화';b.classList.toggle('red',on);b.classList.toggle('stone',!on);
+  if(on)resetT=setTimeout(()=>armReset(false),3000)}
+$('recReset').onclick=()=>{
+  if(!$('recReset').classList.contains('red')){armReset(true);return}
+  S=Object.assign({},DEF,{tro:{},records:[],days:[],fresh:{},theme:S.theme,tut2:S.tut2});save();showRecords();beep(330,.12,'triangle',.05)};
+// ---------- 도감: every strain, every tank-mate, every shop item, every invader ----------
+// [image, name, blurb, tile colour, badge, danger 0-5]
+const DEX=[
+  ['sec','컬러 구피 · 7품종'],
+  ['guppy_blue','블루 모자이크','파랑 꼬리에 모자이크 타일 무늬. 빛을 받으면 금속처럼 반짝여요.','#3a7bd5','컬러 구피'],
+  ['guppy_gold','골드 레이스','금빛 몸에 레이스 같은 그물 무늬 꼬리. 수조가 환해져요.','#e0a82e','컬러 구피'],
+  ['guppy_pink','핑크 화이트','분홍빛 하얀 몸에 연분홍 지느러미. 순하고 우아해요.','#e98fb0','컬러 구피'],
+  ['guppy_red','레드 테일','꼬리 전체가 새빨간 품종. 수조의 주인공이에요.','#d8402a','컬러 구피'],
+  ['guppy_lav','라벤더 플래티넘','연보라 꼬리에 백금빛 광택. 은은하고 고급스러워요.','#a99be0','컬러 구피'],
+  ['guppy_green','그린 모자이크','초록·청록 모자이크 꼬리. 수초 사이에서 특히 예뻐요.','#3fae6a','컬러 구피'],
+  ['guppy_purple','퍼플 모자이크','보랏빛 모자이크 꼬리. 일곱 품종 중 가장 신비로운 색.','#8a4fc0','컬러 구피'],
+  ['note','모든 컬러 구피는 능력이 같아요. 새끼는 절반 확률로 부모 품종을 닮아요.<br>7품종을 한 수조에 다 모으면 <b>무지개 수조</b> 트로피!'],
+  ['guppy_gray','회색 구피','동전을 안 낳고 먹성은 2배. 분양도 안 돼요. 5초마다 반짝! 건지면 +20점.','#8c8c84','골칫거리'],
+  ['sec','수조 친구 · 상점'],
+  ['guppy_red','컬러 구피','어린 컬러 구피 한 마리. 구피가 줄면 채워 넣어요.','#3a8a6e','120코인'],
+  ['cory','코리도라스','바닥 동전을 쏙 주워 오고 가라앉은 사료도 먹어요. 1분 지나면 다 커서 빨라져요.','#3a8a6e','150코인'],
+  ['shrimp6','브라인쉬림프','구피들이 흥분해서 빨라지고 먹은 만큼 급성장! 먹은 뒤 5초간 동전 1.5배.','#3a8a6e','100코인'],
+  ['bucket','물갈이','구피가 2배면 4배 빨리 더러워져요. 30% 아래면 동전을 안 낳아요.','#3a8a6e','100코인'],
+  ['guppy_gold','10마리 분양','컬러 성어 10마리를 내보내고 +1,500점. 수조 자리도 비워져요.','#3a8a6e','+1,500점'],
+  ['sec','침입자'],
+  ['convict','컨빅트 시클리드','가장 작지만 사나워요. 점선 영역에 들어온 어린 구피에게 돌진!','#7a2a1e','침입자',2],
+  ['discus','디스커스','느릿느릿 떠다니다 어린 구피를 쭉 빨아들여요. 그때 치면 놓쳐요.','#7a2a1e','침입자',1],
+  ['angel','알텀엔젤','구피 위로 올라갔다가 아래로 내리꽂아요. 성어도 노려요.','#7a2a1e','침입자',3],
+  ['oscar','오스카','묵직해서 잘 안 밀려요. 한입에 두 마리! 배부르면 바닥에서 졸아요.','#7a2a1e','침입자',4],
+  ['piranha','블랙 피라냐','빙빙 돌다 두 번 연속 물어요. 먹을수록 눈이 빨개지고 불타며 빨라져요.','#9a1c10','보스',5],
+];
+$('dexGrid').innerHTML=DEX.map(r=>r[0]==='sec'?'<div class="dsec">'+r[1]+'</div>':r[0]==='note'?'<div class="dnote">'+r[1]+'</div>'
+  :'<div class="dcard" style="--c:'+r[3]+'"><div class="pic"><span class="bdg'+(r[5]!=null?' red':'')+'">'+r[4]+'</span><img src="assets/'+r[0]+'.png" alt=""></div>'
+   +'<div class="nm">'+r[1]+'</div>'+(r[5]!=null?'<div class="dg">위험 <i>'+'●'.repeat(r[5])+'</i>'+'○'.repeat(5-r[5])+'</div>':'')+'<div class="ds">'+r[2]+'</div></div>').join('');
+function showDex(){show('dexScr');$('dexScr').querySelector('.in').scrollTop=0}
+
+// ---------- tutorial: short looping scenes drawn with the real game art, one lesson per page ----------
+const TUT=[
+  {t:'사료 주기',d:['빈 물을 <b>탭</b>하면 사료가 떨어져요.','한 알에 5코인, 한 번에 3알까지','말풍선이 뜬 <b>배고픈 구피</b>만 먹어요.','오래 굶으면 죽어요!']},
+  {t:'동전 줍기',d:['<b>동전을 탭</b>하면 코인과 점수를 얻어요.','빠르게 연달아 주우면 <b>콤보</b>! 점수 최대 3배','바닥에 닿은 동전은 1초 뒤 사라져요.','코리도라스가 바닥 동전을 대신 주워 줘요.']},
+  {t:'회색 구피 건지기',d:['손가락으로 <b>쓱 그으면</b> 뜰채가 지나가요.','회색 구피는 동전을 안 낳고 먹이만 뺏어요.','건지면 <b>+20점</b>, 여럿 한 번에 건지면 보너스!','컬러 구피를 같이 건지면 감점이에요.']},
+  {t:'침입자 쫓아내기',d:['머리 위에 <b>노란 "!"</b>가 뜨면 공격 직전!','그때 <b>뜰채로 쓱</b> 치면 공격이 끊겨요.','체력바를 다 깎으면 <b>보석</b>을 떨구고 도망가요.']},
+  {t:'점수 따는 법',d:['<b>동전 줍기</b> (콤보면 최대 3배)','<b>침입자 쫓아내기</b> +250 ~ 1,200','<b>회색 구피 건지기</b> +20','<b>성어 10마리 분양</b> +1,500','3분이 끝나면 성어 1마리당 <b>+100</b>, 코리 1마리당 <b>+150</b>']},
+  {t:'게임 오버',d:['수조에 <b>구피가 0마리</b>가 되면 끝!','굶어도, 잡아먹혀도 마찬가지예요.','구피가 줄면 상점에서 <b>컬러 구피</b>(120코인)를 사서 채워요.','3분 모드는 시간이 끝나면 점수로 별을 받아요.']},
+];
+const TW=300,TH=190;let tctx=null,tutOpen=false,tutPage=0,tutFromGame=false;
+const ease=x=>x<=0?0:x>=1?1:x*x*(3-2*x),seg=(p,a,b)=>clamp((p-a)/(b-a),0,1),lerp=(a,b,k)=>a+(b-a)*k;
+const gup=(img,x,y,w,face,t,amp=.1)=>fish(IMG[img],x,y,w,face,t*10,amp,img==='guppy_gray'?.4:.5);
+// a pointing hand whose fingertip sits at (x,y); `press` (0..1) pushes it in, `ring` (0..1) is the tap ripple
+function finger(x,y,press,ring){
+  if(ring>0&&ring<1){ctx.strokeStyle='rgba(255,255,255,'+(1-ring).toFixed(2)+')';ctx.lineWidth=3;ctx.beginPath();ctx.arc(x,y,6+ring*22,0,7);ctx.stroke()}
+  const s=1-press*.12,rr=(X,Y,w,h,r)=>{ctx.beginPath();ctx.roundRect?ctx.roundRect(X,Y,w,h,r):ctx.rect(X,Y,w,h)};
+  ctx.save();ctx.translate(x,y+press*3);ctx.scale(s,s);ctx.rotate(-.18);
+  ctx.fillStyle='#fff6ee';ctx.strokeStyle=INK;ctx.lineWidth=2.2;ctx.lineJoin='round';
+  rr(-11,16,30,26,9);ctx.fill();ctx.stroke();          // fist
+  rr(-5,-1,11,30,5.5);ctx.fill();ctx.stroke();         // pointing finger
+  rr(5,14,9,12,4);ctx.fill();ctx.stroke();rr(12,17,8,11,4);ctx.fill();ctx.stroke();   // curled fingers
+  ctx.fillStyle='#fff6ee';ctx.fillRect(-3.8,14,8.6,10);
+  ctx.strokeStyle='rgba(36,22,12,.35)';ctx.lineWidth=1.4;ctx.beginPath();ctx.moveTo(-2,6);ctx.lineTo(3,6);ctx.stroke();
+  ctx.restore();
+}
+function burst(x,y,k,col){ctx.fillStyle=col;ctx.globalAlpha=1-k;for(let i=0;i<7;i++){const a=i/7*Math.PI*2;ctx.beginPath();ctx.arc(x+Math.cos(a)*k*26,y+Math.sin(a)*k*26,2.4*(1-k)+.6,0,7);ctx.fill()}ctx.globalAlpha=1}
+function hungerBubble(x,y){ctx.fillStyle='rgba(255,255,255,.92)';ctx.strokeStyle=INK;ctx.lineWidth=1.4;ctx.beginPath();ctx.arc(x,y,8,0,7);ctx.fill();ctx.stroke();ctx.fillStyle='#8a4f22';ctx.beginPath();ctx.arc(x,y,3.4,0,7);ctx.fill()}
+function pellet(x,y){ctx.fillStyle='#8a4f22';ctx.beginPath();ctx.arc(x,y,4.5,0,7);ctx.fill();ctx.fillStyle='#d99a5e';ctx.fillRect(x-2,y-2,2,2)}
+function hpBar(x,y,p){ctx.fillStyle=INK;ctx.fillRect(x-27,y,54,8);ctx.fillStyle=p>.35?'#ffb04a':'#ff6b5b';ctx.fillRect(x-25,y+2,50*p,4)}
+function census(n,warn){const x0=TW-72;ctx.fillStyle='rgba(36,22,12,.8)';ctx.strokeStyle=warn?'#ff6b5b':'#b9824f';ctx.lineWidth=2;ctx.beginPath();ctx.roundRect?ctx.roundRect(x0,8,64,28,7):ctx.rect(x0,8,64,28);ctx.fill();ctx.stroke();
+  sprite(IMG.guppy_lav,x0+18,22,26);textOut(String(n),x0+38,30,17,warn?'#ff8a7a':'#f7e9cc','left',3)}
+function netAt(x,y,ang){if(IMG.net)sprite(IMG.net,x-Math.cos(ang)*10,y-Math.sin(ang)*10,80,1,ang+Math.PI*.25)}
+function trail(path,k0,k1){ctx.strokeStyle='rgba(255,255,255,.55)';ctx.lineCap='round';ctx.lineWidth=9;ctx.beginPath();for(let i=0;i<=12;i++){const [x,y]=path(lerp(k0,k1,i/12));i?ctx.lineTo(x,y):ctx.moveTo(x,y)}ctx.stroke()}
+const SCENES=[
+  // 1. tap empty water → pellet sinks → the hungry guppy swims over and eats it
+  (p,t)=>{const tx=205,ty=48,eat=.74,k=ease(seg(p,.3,.72)),gx=lerp(70,190,k),gy=128+Math.sin(t*2)*2;
+    if(p>.14&&p<eat)pellet(tx,lerp(ty,126,ease(seg(p,.14,.6))));
+    gup('guppy_blue',gx,gy,62,1,t);
+    if(p<eat)hungerBubble(gx+8,gy-26);else{const q=seg(p,eat,1);ctx.globalAlpha=1-q;textOut('냠!',gx+16,gy-22-q*14,18,'#fff');ctx.globalAlpha=1}
+    if(p<.34){finger(tx,ty,ease(seg(p,.04,.12))-ease(seg(p,.14,.2)),seg(p,.1,.34));if(p>.12){const q=seg(p,.12,.34);ctx.globalAlpha=1-q;textOut('-5',tx+26,ty-6-q*12,15,'#ffe0d6');ctx.globalAlpha=1}}},
+  // 2. a guppy drops a coin → tap it → +40, combo
+  (p,t)=>{const gx=118+Math.sin(t*1.6)*12,gy=68,cx=150,cy=lerp(gy+14,148,ease(seg(p,.06,.46)));
+    gup('guppy_red',gx,gy,62,1,t);gup('guppy_green',230+Math.sin(t)*10,120,50,-1,t);
+    if(p>.04&&p<.62)spriteH(coinImg('gold',t),cx,cy,24);
+    if(p>=.62){const q=seg(p,.62,1);burst(cx,cy,Math.min(1,q*2),'#ffd75a');ctx.globalAlpha=1-q;textOut('+40',cx,cy-14-q*24,21,'#ffd75a');textOut('2 콤보!',cx,cy-38-q*24,15,'#fff');ctx.globalAlpha=1}
+    if(p>.42&&p<.82)finger(cx,cy,ease(seg(p,.5,.6))-ease(seg(p,.64,.72)),seg(p,.58,.82))},
+  // 3. drag the net through the gray guppy → it lifts out of the water and fades
+  (p,t)=>{const path=k=>[lerp(36,282,k),40+k*110+Math.sin(k*Math.PI)*13],kc=(165-36)/246,pc=.1+.5*kc,k=seg(p,.1,.6),[hx,hy]=path(k);
+    gup('guppy_pink',88,150,52,1,t);
+    if(p<pc)gup('guppy_gray',165+Math.sin(t*2)*3,110,50,-1,t);
+    if(p>.1&&p<.75){trail(path,Math.max(0,k-.3),k);const [ax,ay]=path(Math.min(1,k+.01));netAt(hx,hy,Math.atan2(ay-hy,ax-hx));finger(hx,hy,1,0)}
+    if(p>=pc){const q=seg(p,pc,pc+.45),[cx,cy]=path(kc);ctx.globalAlpha=1-q;gup('guppy_gray',cx,cy-q*q*80,50,-1,t*2,.2);textOut('쏙! +20',cx,cy-24-q*30,17,'#e9ffd8');ctx.globalAlpha=1}},
+  // 4. "!" over the invader → swipe it → it jolts and flashes, health drops
+  (p,t)=>{const mx=196,my=100,hitAt=.42,hk=p>hitAt?1-seg(p,hitAt,hitAt+.16):0,jx=hk>0?Math.sin(hk*28)*6*hk:0,path=k=>[110+k*170,30+k*120],k=seg(p,.3,.56),[hx,hy]=path(k);
+    gup('guppy_gold',78,128,46,-1,t);
+    const quiver=p<hitAt,img=IMG.convict;
+    fish(img,mx+jx,my,96,-1,t*4,.06,.22,false,.2,t*(quiver?28:6),quiver?.05:.015);
+    if(hk>.35){ctx.save();ctx.globalCompositeOperation='lighter';ctx.globalAlpha=Math.min(1,(hk-.35)*2.4);fish(img,mx+jx,my,96,-1,t*4,.06,.22,false,.2,0,0);fish(img,mx+jx,my,96,-1,t*4,.06,.22,false,.2,0,0);ctx.restore()}
+    hpBar(mx,my-48,p<hitAt?1:.62);
+    if(quiver&&Math.floor(t*6)%2)textOut('!',mx-40,my-20,26,'#ffd75a','center',4);
+    if(p>.3&&p<.66){trail(path,Math.max(0,k-.35),k);netAt(hx,hy,Math.atan2(120,170));finger(hx,hy,1,0)}
+    if(p>hitAt){const q=seg(p,hitAt,hitAt+.3);ctx.globalAlpha=1-q;ctx.strokeStyle='#fff';ctx.lineWidth=4*(1-q)+1;ctx.beginPath();ctx.arc(mx,my,12+q*40,0,7);ctx.stroke();textOut('퍽!',mx,my-62-q*16,20,'#fff');ctx.globalAlpha=1}},
+  // 5. the ways to score, popping in turn
+  (p,t)=>{const items=[
+      [()=>spriteH(coinImg('gold',t),58,128,24),58,128,'+40 콤보','#ffd75a'],
+      [()=>sprite(IMG.gem,128,82,26),128,82,'+250 코인','#ff9a9a'],
+      [()=>fish(IMG.discus,232,72,64,1,t*4,.06,.18),232,72,'쫓아냈다! +250','#ffd75a'],
+      [()=>gup('guppy_gray',220,146,46,-1,t,.18),220,146,'쏙! +20','#e9ffd8']];
+    items.forEach(([draw,x,y,txt,col],i)=>{const q=(p+i*.25)%1;draw();if(q<.6){const a=seg(q,0,.6);ctx.globalAlpha=1-a;textOut(txt,x,y-22-a*26,16,col);ctx.globalAlpha=1}})},
+  // 6. the last guppy gets eaten → the counter hits 0 → game over
+  (p,t)=>{const eatAt=.42,k=ease(seg(p,.08,eatAt)),ax=lerp(-20,140,k),ay=lerp(70,112,k),gx=176,gy=116,dead=p>eatAt;
+    if(!dead)gup('guppy_lav',gx,gy,50,1,t);else if(p<.58){const q=seg(p,eatAt,.58);ctx.globalAlpha=1-q;textOut('앙! 잡아먹혔다',gx,gy-24-q*10,15,'#ffe0d6');ctx.globalAlpha=1}
+    fish(IMG.angel,ax,ay,92,1,t*4,.08,.2,false,.2,t*(dead?20:6),dead&&p<.55?.09:.015);
+    census(dead?0:1,dead&&Math.floor(t*6)%2);
+    if(p>.58){const q=seg(p,.58,.72);ctx.fillStyle='rgba(6,20,18,'+(q*.55).toFixed(2)+')';ctx.fillRect(0,0,TW,TH);ctx.globalAlpha=q;textOut('게임 오버',TW/2,TH/2+10,32,'#ff9a8a','center',6);ctx.globalAlpha=1}},
+];
+function drawTut(time){
+  const c=$('tutCv');if(!tctx)tctx=c.getContext('2d');
+  const dpr=Math.min(window.devicePixelRatio||1,2),cw=Math.round(c.clientWidth*dpr);if(!cw)return;
+  if(c.width!==cw){c.width=cw;c.height=Math.round(cw*TH/TW)}
+  const keep=ctx;ctx=tctx;
+  try{
+    ctx.setTransform(c.width/TW,0,0,c.width/TW,0,0);ctx.imageSmoothingEnabled=true;ctx.globalAlpha=1;ctx.globalCompositeOperation='source-over';
+    const b=IMG.bg;if(b){const sw=b.width*.8,sh=sw*TH/TW;ctx.drawImage(b,b.width*.1,b.height-sh-b.height*.04,sw,sh,0,0,TW,TH)}else{ctx.fillStyle='#123a33';ctx.fillRect(0,0,TW,TH)}
+    SCENES[tutPage]((time%2.8)/2.8,time);
+  }finally{ctx=keep}
+}
+function openTut(fromGame){tutFromGame=fromGame;tutPage=0;renderTut();show('tutScr')}
+function renderTut(){
+  const P=TUT[tutPage],last=tutPage===TUT.length-1;
+  $('tutTitle').textContent=(tutPage+1)+'. '+P.t;$('tutTxt').innerHTML='<ul class="tutlist">'+P.d.map(l=>'<li>'+l+'</li>').join('')+'</ul>';$('tutIn').scrollTop=0;
+  $('tutDots').innerHTML=TUT.map((_,i)=>'<i'+(i===tutPage?' class="on"':'')+'></i>').join('');
+  $('tutLeft').textContent=tutPage?'이전':tutFromGame?'건너뛰기':'닫기';
+  $('tutRight').textContent=last?(tutFromGame?'시작!':'닫기'):'다음';scrollHints();
+}
+
+$('lakeBtn').onclick=()=>start('lake');
+$('hardBtn').onclick=e=>tryStart('amazon',e.currentTarget);
+$('endlessBtn').onclick=e=>tryStart('endless',e.currentTarget);
+$('troBtn').onclick=showTrophies;$('recBtn').onclick=showRecords;$('howBtn').onclick=()=>openTut(false);$('dexBtn').onclick=showDex;
+document.querySelectorAll('[data-close]').forEach(b=>b.onclick=showMenu);
+$('pauseBtn').onclick=()=>{if(!G||G.over||paused)return;paused=true;show('pause')};
+$('resumeBtn').onclick=()=>{show(null);paused=false;last=performance.now()};
+$('quitBtn').onclick=()=>{if(G&&G.endless&&!G.over){endGame(false);return}G=null;showMenu()};
+$('againBtn').onclick=()=>start(G?.mode||'lake');
+$('menuBtn').onclick=showMenu;
+const tutGo=()=>{show(null);paused=false;last=performance.now();beep(523,.1,'triangle',.05);setTimeout(()=>beep(784,.15,'triangle',.05),90)};
+const tutDone=()=>{if(tutFromGame){S.tut2=true;save();tutGo()}else showMenu()};
+$('tutLeft').onclick=()=>{if(tutPage){tutPage--;renderTut()}else tutDone()};
+$('tutRight').onclick=()=>{if(tutPage<TUT.length-1){tutPage++;renderTut()}else tutDone()};
+$('shareBtn').onclick=e=>{const b=e.currentTarget,t=b.dataset.txt;
+  const p=navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject();
+  p.then(()=>{b.textContent='복사됨!'}).catch(()=>{b.textContent='복사 실패'})};
+// a tap grabs a coin or drops food; a drag past 16px becomes a net swipe
+let ptr=null;
+const local=e=>{const r=cv.getBoundingClientRect();return[(e.clientX-r.left)/r.width*W,(e.clientY-r.top)/r.height*H]};
+cv.addEventListener('pointerdown',e=>{const [x,y]=local(e);try{cv.setPointerCapture(e.pointerId)}catch(_){}ptr={x0:x,y0:y,coin:grabCoin(x,y),net:false}});
+cv.addEventListener('pointermove',e=>{if(!ptr)return;const [x,y]=local(e);
+  if(!ptr.net&&Math.hypot(x-ptr.x0,y-ptr.y0)>16&&G&&!paused&&!G.over){ptr.net=true;netStart(ptr.x0,ptr.y0)}
+  if(ptr.net)netMove(x,y)});
+cv.addEventListener('pointerup',()=>{if(!ptr)return;if(ptr.net)netEnd();else if(!ptr.coin)feed(ptr.x0,ptr.y0);ptr=null});
+cv.addEventListener('pointercancel',()=>{if(ptr&&ptr.net)netEnd();ptr=null});
+document.addEventListener('visibilitychange',()=>{if(document.hidden&&G&&!G.over&&!paused){paused=true;show('pause')}});
+
+function loop(now){
+  const dt=Math.min(.05,(now-last)/1000||0);last=now;clock+=dt;
+  if(G&&!paused&&!G.over){update(dt);syncHud()}
+  render(clock,dt);if(tutOpen)drawTut(clock);requestAnimationFrame(loop);
+}
+showMenu();
+loadAll().then(()=>{$('loading').hidden=true;resize();requestAnimationFrame(t=>{last=t;loop(t)})});
+window.__aqua={get G(){return G},start,tap,swipe:swipeAll,step:dt=>{if(G&&!G.over)update(dt)},render:()=>render(clock,0),tut:(pg,t)=>{tutPage=pg;drawTut(t)}};
+})();
+</script>
+
+
+</body></html>
