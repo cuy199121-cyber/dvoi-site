@@ -202,7 +202,7 @@ body{background:#1b110b}
 .menuBtn{background:linear-gradient(#80562f,#5c3b20);box-shadow:0 0 0 2px #140b05,inset 0 2px 0 #a8743f;color:#f8ecd4}
 .tbtn{width:auto;padding:0 6px;font:inherit;font-size:12px;position:relative;white-space:nowrap}
 .top{gap:6px}.top .stat.money{display:flex;flex-direction:column;align-items:flex-end;line-height:1.1;padding:2px 6px}.top .stat.money small{font-size:10px}
-#tankNav{position:absolute;left:50%;top:4px;transform:translateX(-50%);display:flex;align-items:center;gap:6px;z-index:5;background:#2a190e;color:#ffe9b0;padding:4px;box-shadow:0 0 0 2px #140b05,0 0 0 4px #8a6a3e;white-space:nowrap}
+#tankNav.show{opacity:1;pointer-events:auto}#tankNav{opacity:0;pointer-events:none;transition:opacity .6s ease;position:absolute;left:50%;top:4px;transform:translateX(-50%);display:flex;align-items:center;gap:6px;z-index:5;background:#2a190e;color:#ffe9b0;padding:4px;box-shadow:0 0 0 2px #140b05,0 0 0 4px #8a6a3e;white-space:nowrap}
 #tankNav button{height:30px;padding:0 12px;border:0;font:inherit;font-size:13px;color:#f8ecd4;background:linear-gradient(#80562f,#5c3b20);box-shadow:inset 0 2px 0 #a8743f;cursor:pointer}#tankNav button.on{background:linear-gradient(#ffd66a,#e0a93a);color:#3a2614;box-shadow:inset 0 2px 0 #fff0b8}
 #tankNav span{padding:0 6px;font-size:13px}.tri{display:block;width:0;height:0;border-top:7px solid transparent;border-bottom:7px solid transparent}.tri.l{border-right:10px solid #f8ecd4}.tri.r{border-left:10px solid #f8ecd4}
 .mvDest{display:flex;gap:8px;margin:8px 0 12px}.mvDest .pbtn{flex:1;display:flex;flex-direction:column;align-items:center;padding:8px 4px;font-size:14px}.mvDest small{font-size:11px;opacity:.85}
@@ -212,7 +212,7 @@ body{background:#1b110b}
 .pzb{width:30px;padding:0;display:flex;align-items:center;justify-content:center}.pz{display:block;width:10px;height:11px;border-left:3px solid #f8ecd4;border-right:3px solid #f8ecd4;box-sizing:border-box}
 .pzb.paused{background:linear-gradient(#e8b84a,#b8862a);box-shadow:0 0 0 2px #140b05,inset 0 2px 0 #ffe08a}.pzb.paused .pz{width:0;height:0;border-right:0;border-left:10px solid #3a2614;border-top:6px solid transparent;border-bottom:6px solid transparent;margin-left:3px}
 .top .stats{gap:5px}.top .stat{padding:2px 6px}
-:has(>#tankNav:not([hidden]))>#toasts{top:50px}:has(>#tankNav:not([hidden]))>#pzTag{top:94px}
+:has(>#tankNav.show)>#toasts{top:50px}:has(>#tankNav.show)>#pzTag{top:94px}
 #pzTag{position:absolute;left:50%;top:50px;transform:translateX(-50%);background:#2a190e;color:#ffe9b0;padding:4px 12px;box-shadow:0 0 0 2px #140b05,0 0 0 4px #c9a054;z-index:5;pointer-events:none}
 .stage{background:#140b05;box-shadow:0 3px 0 #140b05}
 .hud{background:repeating-linear-gradient(0deg,#3a2516 0 20px,#35210f 20px 22px);box-shadow:inset 0 3px 0 #140b05}
@@ -229,7 +229,7 @@ body{background:#1b110b}
 main{background:repeating-linear-gradient(0deg,#4e321c 0 26px,#462c18 26px 28px)}
 .grp,.item,.score,.badge,.sw,.dex>div,.fryrow,.sel,.card{--ink:#3a2614;--muted:#86663f;color:#3a2614}
 .grp,.item,.score,.badge,.sw,.dex>div,.fryrow,.sel{background:#efe2c6;box-shadow:0 0 0 2px #24140a,inset 0 0 0 2px #c9ad80}
-#stage>.sel{position:absolute;left:8px;right:8px;top:8px;z-index:6;line-height:1.45}:has(>#tankNav:not([hidden]))>.sel{top:50px}
+#stage>.sel{position:absolute;left:8px;right:8px;top:8px;z-index:6;line-height:1.45}:has(>#tankNav.show)>.sel{top:50px}
 .capBtn{position:absolute;right:max(10px,env(safe-area-inset-right,0px));bottom:12px;z-index:6;padding:8px 16px;font-size:14px}
 #capOv{position:fixed;inset:0;z-index:320;background:rgba(10,6,2,.94);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:16px}#capOv img{max-width:100%;max-height:70vh;box-shadow:0 0 0 3px #c9a054}#capOv p{margin:0;color:#e9d6ae;font-size:12px;text-align:center}#capOv .row{display:flex;gap:10px}
 .top .roomBtn.on{background:linear-gradient(#e8a92a,#b8761a);color:#3a2614}
@@ -502,6 +502,7 @@ function buildRoom2(){if(!ROOMIMG.complete||!ROOMIMG.naturalWidth)return null;co
   x.drawImage(img,0,0,W,SY,0,0,W,SY);x.save();x.translate(W*2,0);x.scale(-1,1);x.drawImage(img,0,0,W,SY,0,0,W,SY);x.restore();
   x.drawImage(img,0,SY,SX,H-SY,0,SY,SX,H-SY);for(let i=0;i<OFF;i+=4)x.drawImage(img,SX,SY,4,H-SY,SX+i,SY,4,H-SY);x.drawImage(img,SX,SY,W-SX,H-SY,SX+OFF,SY,W-SX,H-SY);return c}
 function setupRoom(){roomLayer=ROOMIMG}
+let tnT=0;function flashTankNav(){const n=$('#tankNav');if(!n||n.hidden)return;n.classList.add('show');clearTimeout(tnT);tnT=setTimeout(()=>n.classList.remove('show'),2000)}
 function updateTankNav(){const nav=$('#tankNav');if(!nav)return;const n=S&&S.tanks?S.tanks.length:1;nav.hidden=mode!=='game'||n<2;if(n<2)return;
   const sig=n+'|'+S.cur;if(nav.dataset.sig===sig)return;nav.dataset.sig=sig;nav.innerHTML=S.tanks.map((t,i)=>`<button data-act="selTank" data-i="${i}" class="${i===S.cur?'on':''}">${i+1}번 어항</button>`).join('')}
 function drawTankPlates(){if(S.tanks.length<2)return;ctx.font='7px Galmuri11, monospace';ctx.textAlign='center';ctx.textBaseline='middle';
@@ -930,7 +931,7 @@ function buildWater(){
 
 /* ---------- camera ---------- */
 const cam={x:160,y:110,z:1.35,uz:1,panT:-1e9};
-const ZMAX=3;function roomZ(){return 160/(ROOM.H)}function zmin(){return (ROOMVIEW||coachCam)?Math.min(roomZ(),.2):160/360}function clampUz(v){const a=autoZ();return clamp(v,zmin()/a,ZMAX/a)}
+const ZMAX=3;function roomZ(){return 160/(ROOM.H)}function zmin(){return (ROOMVIEW||coachCam)?Math.min(roomZ(),.2):160/360}function clampUz(v){const a=autoZ();if(ROOMVIEW)return roomZ()/a;return clamp(v,zmin()/a,ZMAX/a)}
 function autoZ(){const n=adults().length+S.fish.filter(f=>!f.adult).length*.5;return clamp(.85-.012*(n-2),.5,.85)}
 function viewW(){return 160/cam.z}
 let camOff=0;function camOffTarget(){if(!sheetUp)return 0;const sh=$('#sheet'),l=parseFloat(sh&&sh.style.getPropertyValue('--lift'))||0;return l/2}
@@ -1484,12 +1485,12 @@ cv.addEventListener('pointerdown',e=>{if(mode!=='game')return;cv.setPointerCaptu
   if(ptrs.size===1)gest={type:'tap',x0:e.clientX,y0:e.clientY,t0:performance.now(),cx:cam.x,cy:cam.y};
   else if(ptrs.size===2){const[a,b]=[...ptrs.values()];gest={type:'pinch',d0:Math.hypot(a.x-b.x,a.y-b.y),uz0:cam.uz}}});
 cv.addEventListener('pointermove',e=>{if(!ptrs.has(e.pointerId)||!gest)return;ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});
-  if(gest.type==='pinch'&&ptrs.size===2){const[a,b]=[...ptrs.values()],d=Math.hypot(a.x-b.x,a.y-b.y);cam.uz=clampUz(gest.uz0*d/gest.d0);cam.panT=performance.now()}
+  if(gest.type==='pinch'&&ptrs.size===2&&!ROOMVIEW){const[a,b]=[...ptrs.values()],d=Math.hypot(a.x-b.x,a.y-b.y);cam.uz=clampUz(gest.uz0*d/gest.d0);cam.panT=performance.now()}
   else if(ptrs.size===1){const dx=e.clientX-gest.x0,dy=e.clientY-gest.y0;if(gest.type==='tap'&&Math.hypot(dx,dy)>8)gest.type='drag';
     if(gest.type==='drag'){const r=cv.getBoundingClientRect(),k=viewW()/r.width;cam.x=gest.cx-dx*k;cam.y=gest.cy-dy*k;cam.panT=performance.now()}}});
 const endPtr=e=>{if(!ptrs.has(e.pointerId))return;ptrs.delete(e.pointerId);
   if(gest&&gest.type==='drag'&&ptrs.size===0&&!ROOMVIEW&&S.tanks.length>1){const dx=e.clientX-gest.x0,dy=e.clientY-gest.y0,dt2=performance.now()-gest.t0;
-    if(dt2<450&&Math.abs(dx)>60&&Math.abs(dx)>Math.abs(dy)*1.6){const ni=S.cur+(dx<0?1:-1);if(S.tanks[ni]){cam.x=gest.cx;selectTank(ni);cam.panT=-1e9;sfx('tank')}}}
+    if(dt2<450&&Math.abs(dx)>60&&Math.abs(dx)>Math.abs(dy)*1.6){const ni=S.cur+(dx<0?1:-1);if(S.tanks[ni]){cam.x=gest.cx;selectTank(ni);cam.panT=-1e9;sfx('tank');flashTankNav()}}}
   if(gest&&gest.type==='tap'&&ptrs.size===0&&performance.now()-gest.t0<450)tapAt(e.clientX,e.clientY);
   if(ptrs.size===0)gest=null;else if(gest&&gest.type==='pinch'){const[a]=[...ptrs.values()];gest={type:'drag',x0:a.x,y0:a.y,cx:cam.x,cy:cam.y}}};
 cv.addEventListener('pointerup',endPtr);cv.addEventListener('pointercancel',endPtr);
@@ -1550,7 +1551,7 @@ function act(a,el){
     case 'mapZoom':{let z=$('#mapZoom');if(!z){z=document.createElement('div');z.id='mapZoom';z.innerHTML='<img src="'+(el.src||$('#tutMap').src)+'" alt="브리딩 지도"><button class="pbtn small">닫기</button>';z.addEventListener('click',e=>{if(e.target.tagName==='BUTTON'){z.remove();return}if(e.target.tagName==='IMG')z.classList.toggle('z2')});document.body.appendChild(z)}return}
     case 'roomView':{ROOMVIEW=!ROOMVIEW;$('#roomBtn').classList.toggle('on',ROOMVIEW);$('#capBtn').hidden=!ROOMVIEW;
       if(ROOMVIEW){cam.uz=roomZ()/autoZ();cam.z=roomZ();cam.x=ROOM.L+ROOM.W/2;cam.y=ROOM.T+ROOM.H/2;cam.panT=performance.now()+1e9;setSheet(false)}else{cam.uz=1;cam.panT=-1e9}return}
-    case 'capture':{const sc=2,c=document.createElement('canvas');c.width=Math.round(ROOM.W*sc);c.height=Math.round(ROOM.H*sc);const old=ctx,ss=selId;ctx=c.getContext('2d');selId=null;CAPTURE={w:c.width,h:c.height,k:sc};
+    case 'capture':{const sc=1920/ROOM.W,c=document.createElement('canvas');c.width=Math.round(ROOM.W*sc);c.height=Math.round(ROOM.H*sc);const old=ctx,ss=selId;ctx=c.getContext('2d');selId=null;CAPTURE={w:c.width,h:c.height,k:sc};
       try{draw(performance.now(),0)}finally{CAPTURE=null;ctx=old;selId=ss}
       c.toBlob(bl=>{if(!bl)return;const url=URL.createObjectURL(bl),fn='guppy-room-'+Date.now()+'.png';let o=$('#capOv');if(o)o.remove();o=document.createElement('div');o.id='capOv';
         o.innerHTML='<img alt="방 캡처"><div class="row"><button class="pbtn gold" data-k="save">저장하기</button><button class="pbtn" data-k="close">닫기</button></div><p>저장이 안 되면 사진을 길게 눌러 저장하세요.</p>';o.querySelector('img').src=url;document.body.appendChild(o);
@@ -1631,7 +1632,7 @@ function playAct(a,b,m0){let k=ACT_SND[a]||'tap';
 let sheetUp=false;
 function sheetLift(){const pn=$('#panel'),st=$('#stage');if(!pn||!st)return 180;const g=pn.querySelectorAll('.grp');let need;
   if(g.length){const top=g[0].offsetTop-pn.offsetTop,rh=g.length>1?g[1].offsetTop-g[0].offsetTop:g[0].offsetHeight+10;need=top+rh*3+8}else need=pn.clientHeight+170;
-  return Math.round(clamp(need-pn.clientHeight,60,st.getBoundingClientRect().height*.72))}
+  return Math.round(clamp(need-pn.clientHeight,60,st.getBoundingClientRect().height*.72)*.5)}
 function setSheet(up){const sh=$('#sheet');if(!sh)return;if(up){if(!sheetUp){const old=TAB;if(TAB!=='fish'){TAB='fish';renderPanel(true)}const l=sheetLift();sh.style.setProperty('--lift',l+'px');if(old!==TAB){TAB=old;renderPanel(true)}}}sheetUp=up;sh.classList.toggle('up',up)}
 
 /* ---------- in-game guided tutorial (coach marks on the real screen) ---------- */
