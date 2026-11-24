@@ -247,6 +247,7 @@ footer a{color:var(--mutednow);text-underline-offset:3px}
 <div id="privacy" hidden>
   <div class="wrap">
     <a class="back" href="#home">← Dvoi 홈으로</a>
+    <div class="pv-ko" lang="ko">
     <h1>개인정보처리방침</h1>
     <div class="eff">구피 키우기 · 시행일 2026년 11월 24일</div>
     <p class="lead">드보이(Dvoi, 이하 "개발자")는 모바일 게임 「구피 키우기」(이하 "앱")를 이용하는 분의 개인정보를 소중히 다루며, 아래와 같이 처리합니다.</p>
@@ -275,6 +276,37 @@ footer a{color:var(--mutednow);text-underline-offset:3px}
       <li>이메일: uy.motion.21@gmail.com</li>
       <li>상호: 드보이 (Dvoi) · 사업자등록번호 736-48-01207</li>
     </ul>
+    </div>
+    <div class="pv-en" lang="en" hidden>
+    <h1>Privacy Policy</h1>
+    <div class="eff">Guppy Keeper (구피 키우기) · Effective November 24, 2026</div>
+    <p class="lead">Dvoi ("the developer") respects the privacy of everyone who plays the mobile game "구피 키우기" (Guppy Keeper, "the app") and handles information as described below.</p>
+    <h2>1. Information the developer collects</h2>
+    <p>The app has no sign-up or login. The developer does not collect any information that identifies you, such as your name, email, phone number or location.</p>
+    <h2>2. Information stored on your device</h2>
+    <p>Game progress such as high scores, trophies, play records and whether you have seen the tutorial is stored only on your device. It is never sent to the developer, and it is deleted when you uninstall the app or clear its data. You can also erase it with "Reset records" in the app.</p>
+    <h2>3. Advertising (Google AdMob)</h2>
+    <p>The app is free and shows Google AdMob ads. A full-screen (interstitial) ad may appear when you leave the results screen after a round, and there is an optional rewarded ad you can choose to watch for ten times the starting coins in your next round. To serve ads, Google may collect and process:</p>
+    <ul>
+      <li>Advertising ID (Android advertising identifier)</li>
+      <li>Device information (model, OS version, language, etc.) and IP address</li>
+      <li>Ad-related activity such as impressions and clicks</li>
+    </ul>
+    <p>This information is used to deliver ads, measure ad performance and prevent fraud, and is handled under Google's privacy policy. See <a href="https://policies.google.com/technologies/ads">How Google uses information from ads</a> and the <a href="https://policies.google.com/privacy">Google Privacy Policy</a> for details.</p>
+    <p>You can reset or delete your advertising ID, or opt out of personalized ads, under <b>Settings → Google → Ads</b> (or Settings → Privacy → Ads) on your device.</p>
+    <h2>4. Other third-party services</h2>
+    <p>The app contains no payments or analytics tools. It may connect to Google Fonts to load fonts, in which case Google may receive basic connection information such as your IP address. The app is downloaded and installed through Google Play, which is governed by Google's privacy policy. The developer does not sell your information to anyone.</p>
+    <h2>5. Children's privacy</h2>
+    <p>The app is not directed primarily at children under 13, and the developer does not directly collect personal information from users of any age.</p>
+    <h2>6. Changes to this policy</h2>
+    <p>If the way information is handled changes, for example by adding payments, the changes and their effective date will be posted on this page before they take effect.</p>
+    <h2>7. Contact</h2>
+    <ul>
+      <li>Privacy officer: Yuyoung Choi (Owner)</li>
+      <li>Email: uy.motion.21@gmail.com</li>
+      <li>Business: Dvoi (드보이) · Business registration no. 736-48-01207</li>
+    </ul>
+    </div>
   </div>
 </div>
 
@@ -328,5 +360,11 @@ footer a{color:var(--mutednow);text-underline-offset:3px}
 })();
 </script>
 
+<script>
+// privacy policy language: Korean on Korean devices, English everywhere else (?lang=ko / ?lang=en forces one)
+(()=>{const q=new URLSearchParams(location.search).get('lang'),l=(q||navigator.language||'ko').toLowerCase(),en=!l.startsWith('ko');
+const ko=document.querySelector('.pv-ko'),e=document.querySelector('.pv-en'),b=document.querySelector('#privacy .back');
+if(ko&&e){ko.hidden=en;e.hidden=!en}if(b&&en)b.textContent='← Dvoi Home';})();
+</script>
 </body>
 </html>
