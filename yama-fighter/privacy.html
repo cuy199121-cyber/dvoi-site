@@ -18,11 +18,13 @@ h1{font-size:clamp(28px,6vw,40px);line-height:1.2;margin:20px 0 4px}
 h2{font-size:18px;margin:32px 0 6px;padding-top:20px;border-top:1px solid var(--line)}
 p,li{margin:0 0 8px}
 ul{padding-left:20px}
+[hidden]{display:none!important}
 </style>
 </head>
 <body>
 <main>
 <a class="back" href="/">← Dvoi 홈으로</a>
+<div class="pv-ko" lang="ko">
 <h1>개인정보처리방침</h1>
 <p class="date">야마파이터 · 시행일 2026년 11월 24일</p>
 <p>드보이(Dvoi, 이하 "개발자")는 모바일 게임 「야마파이터」(이하 "앱")을 이용하는 분의 개인정보를 소중히 다루며, 아래와 같이 처리합니다.</p>
@@ -69,6 +71,61 @@ ul{padding-left:20px}
 
 <h2>8. 문의</h2>
 <p>개인정보 보호책임자: 최유영 (대표)<br>이메일: uy.motion.21@gmail.com<br>상호: 드보이 (Dvoi) · 사업자등록번호 736-48-01207</p>
+</div>
+<div class="pv-en" lang="en" hidden>
+<h1>Privacy Policy</h1>
+<p class="date">Yama Fighter · Effective November 24, 2026</p>
+<p>Dvoi ("the developer") respects the privacy of everyone who plays the mobile game "Yama Fighter" ("the app") and handles information as described below.</p>
+
+<h2>1. Information the developer collects</h2>
+<p>The app has no sign-up or login. The developer does not directly collect information that identifies you, such as your name, email, phone number or location.</p>
+<p>However, if you register a nickname on the Records screen, the following is stored on Google Firebase (Cloud Firestore) servers and shown to other players so the worldwide combo ranking can be displayed:</p>
+<ul>
+<li>The nickname you choose</li>
+<li>A country code read from your device language setting (to show a flag)</li>
+<li>Your best combo and a random record ID created on your device</li>
+</ul>
+<p>Nothing is sent if you do not register a nickname. To have your record deleted, email us your nickname at the address below and we will delete it promptly. Nicknames that are offensive to other players may be removed without notice.</p>
+
+<h2>2. Information stored on your device</h2>
+<p>Game data such as round progress, stars, best scores and sound settings is stored only on your device and is never sent to the developer. It is deleted when you uninstall the app or clear its data.</p>
+
+<h2>3. Advertising (Google AdMob)</h2>
+<p>The app is free and shows Google AdMob ads. Full-screen ads may appear when some rounds start, and there is an optional rewarded ad you can watch to continue playing. To serve ads, Google may collect and process:</p>
+<ul>
+<li>Advertising ID (Android advertising identifier)</li>
+<li>Device information (model, OS version, language, etc.) and IP address</li>
+<li>Ad-related activity such as impressions and clicks</li>
+</ul>
+<p>This information is used to deliver ads, measure ad performance and prevent fraud, and is handled under Google's privacy policy. See <a href="https://policies.google.com/technologies/ads">How Google uses information from ads</a> and the <a href="https://policies.google.com/privacy">Google Privacy Policy</a>.</p>
+<p>You can reset or delete your advertising ID, or opt out of personalized ads, under <b>Settings → Google → Ads</b> (or Settings → Privacy → Ads) on your device.</p>
+
+<h2>4. Usage statistics (Google Firebase Analytics)</h2>
+<p>To make the game better, the app collects usage statistics with Google Firebase Analytics:</p>
+<ul>
+<li>In-game activity (round starts, clears and fails, stars and scores earned, play time, whether ads were watched)</li>
+<li>App instance ID, advertising ID and device information (model, OS version, language, country)</li>
+</ul>
+<p>This information is not used to identify you and is used only for statistics such as tuning difficulty and fixing errors. It is handled under Google's <a href="https://firebase.google.com/support/privacy">Firebase privacy information</a> and kept for up to 14 months.</p>
+
+<h2>5. Other third-party services</h2>
+<p>The app is downloaded and installed through Google Play, which is governed by Google's privacy policy. The developer does not sell your information to anyone.</p>
+
+<h2>6. Children's privacy</h2>
+<p>The app is not directed primarily at children under 13, and the developer does not directly collect personal information from users of any age.</p>
+
+<h2>7. Changes to this policy</h2>
+<p>If the way information is handled changes, the changes and their effective date will be posted on this page before they take effect.</p>
+
+<h2>8. Contact</h2>
+<p>Privacy officer: Yuyoung Choi (Owner)<br>Email: uy.motion.21@gmail.com<br>Business: Dvoi (드보이) · Business registration no. 736-48-01207</p>
+</div>
 </main>
+<script>
+// Korean on Korean devices, English everywhere else (?lang=ko / ?lang=en forces one)
+(()=>{const q=new URLSearchParams(location.search).get('lang'),l=(q||navigator.language||'ko').toLowerCase(),en=!l.startsWith('ko');
+document.querySelector('.pv-ko').hidden=en;document.querySelector('.pv-en').hidden=!en;
+if(en){document.documentElement.lang='en';document.title='Privacy Policy · Yama Fighter';document.querySelector('.back').textContent='← Dvoi Home'}})();
+</script>
 </body>
 </html>
